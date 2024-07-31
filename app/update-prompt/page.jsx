@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import Form from "@components/Form";
+import Loading from "@app/profile/loading";
 
 const UpdatePromptComponent = () => {
   const router = useRouter();
@@ -65,7 +66,7 @@ const UpdatePromptComponent = () => {
 
 const UpdatePrompt = () => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<Loading/>}>
       <UpdatePromptComponent />
     </Suspense>
   );
