@@ -4,7 +4,7 @@ const PromptSchema = new Schema({
   creator: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    //required: true,
+    required: true,
   },
   prompt: {
     type: String,
@@ -13,9 +13,14 @@ const PromptSchema = new Schema({
   tag: {
     type: String,
     required: [true, 'Tag is required.'],
-  }
+  },
+  likes: {
+    type: [Schema.Types.ObjectId],
+    ref: 'User',
+    default: [],
+  },
 }, { timestamps: true });
 
-const Prompt = models.Prompt || model('Prompt', PromptSchema); // checks the models to see if the prompt exists, only create a new model if it doesn't.
+const Prompt = models.Prompt || model('Prompt', PromptSchema);
 
 export default Prompt;
