@@ -17,10 +17,10 @@ const PromptDetails = ({ params }) => {
 
   // Handles profile click - navigates to user's profile
   const handleProfileClick = () => {
-    if (prompt[0].creator._id === session?.user.id) {
+    if (prompt.creator._id === session?.user.id) {
       router.push("/profile"); // Navigate to logged-in user's profile
     } else {
-      router.push(`/profile/${prompt[0].creator._id}?name=${prompt[0].creator.username}`); // Navigate to other user's profile
+      router.push(`/profile/${prompt.creator._id}?name=${prompt.creator.username}`); // Navigate to other user's profile
     }
   };
 
@@ -29,7 +29,7 @@ const PromptDetails = ({ params }) => {
     if (params) {
       const fetchPromptDetails = async () => {
         try {
-          const response = await fetch(`/api/prompt/${params}/details`); // API endpoint for fetching prompt details
+          const response = await fetch(`/api/prompt/${params.id}/`); // API endpoint for fetching prompt details
           const data = await response.json();
           setPrompt(data);
           setLoading(false); // Stop loading when data is fetched
@@ -51,8 +51,6 @@ const PromptDetails = ({ params }) => {
     return <div>No prompt found</div>; // Show message if no prompt is found
   }
 
-  console.log(prompt[0])
-
   return (
     <section>
       <h1 className="head_text text-left">
@@ -67,7 +65,7 @@ const PromptDetails = ({ params }) => {
             onClick={handleProfileClick}
           >
             <Image
-              src={prompt[0].creator.image}
+              src={prompt.creator.image}
               alt="user_image"
               width={50}
               height={50}
@@ -75,10 +73,10 @@ const PromptDetails = ({ params }) => {
             />
             <div className="flex flex-col">
               <h3 className="font-satoshi font-semibold text-gray-900">
-                {prompt[0].creator.username}
+                {prompt.creator.username}
               </h3>
               <p className="font-inter text-sm text-gray-500">
-                {prompt[0].creator.email}
+                {prompt.creator.email}
               </p>
             </div>
           </div>
@@ -86,19 +84,21 @@ const PromptDetails = ({ params }) => {
           {/* Prompt content */}
           <div className="my-5">
             <p className="my-4 font-satoshi text-sm text-gray-700">
-              {prompt[0].prompt}
+              {prompt.prompt}
             </p>
             <p className="font-inter text-sm text-gray-500">
-              Created At: {new Date(prompt[0].createdAt).toLocaleString()}
+              Created At: {new Date(prompt.createdAt).toLocaleString()}
             </p>
           </div>
 
           {/* Tag */}
           <div className="font-inter text-sm blue_gradient">
-            #{prompt[0].tag}
+            #{prompt.tag}
           </div>
         </div>
       </div>
+
+      
     </section>
   );
 };

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
+import LoginPopup from "./LoginPopup"; // Import the LoginPopup component
 
 /**
  * PromptCard Component
@@ -16,19 +17,37 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
   const router = useRouter(); // Next.js router for navigation
 
   const [copied, setCopied] = useState(""); // State to manage copied prompt
+  const [showLoginPopup, setShowLoginPopup] = useState(false); // State to manage popup visibility
+  const [popupMessage, setPopupMessage] = useState(""); // State to manage popup message
 
-  // Handles profile click - navigates to user's profile
+  // Handles profile click - shows login popup if not logged in
   const handleProfileClick = () => {
-    if (post.creator._id === session?.user.id) {
+    if (!session) {
+      // setPopupMessage("You need to be logged in to view this profile. Please log in to continue.");
+      // setShowLoginPopup(true); // Show the login popup
+
+      const message = "You need to be logged in to view this profile. Please log in to continue.";
+      router.push(`/login?message=${message}`)
+      return;
+    }
+    
+    if (post.creator._id === session.user.id) {
       router.push("/profile"); // Navigate to logged-in user's profile
     } else {
       router.push(`/profile/${post.creator._id}?name=${post.creator.username}`); // Navigate to other user's profile
     }
   };
 
-  // Handles prompt click - navigates to prompt details page
+  // Handles prompt click - shows login popup if not logged in
   const handlePromptClick = () => {
-    console.log(post._id)
+    if (!session) {
+      //setPopupMessage("Sorry need to be logged in to view prompt details. Please log in to continue.");
+      //setShowLoginPopup(true); // Show the login popup
+
+      const message = "Sorry need to be logged in to view prompt details. Please log in to continue.";
+      router.push(`/login?message=${message}`)
+      return;
+    }
     router.push(`/promptDetails/${post._id}`);
   };
 
@@ -44,7 +63,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
       <div className="flex justify-between items-start gap-5">
         {/* User information and profile navigation */}
         <div
-          className="flex-1 flex justify-start items-center gap-3 cursor-pointer"
+          className={"flex-1 flex justify-start items-center gap-3 cursor-pointer"}
           onClick={handleProfileClick}
         >
           <Image
@@ -117,6 +136,9 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
           </p>
         </div>
       )}
+
+      {/* Login Popup */}
+      {showLoginPopup && <LoginPopup message={popupMessage} onClose={() => setShowLoginPopup(false)} />}
     </div>
   );
 };

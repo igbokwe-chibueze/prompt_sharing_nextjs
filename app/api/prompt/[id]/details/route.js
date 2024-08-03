@@ -5,12 +5,12 @@ import { connectToDB } from "@utils/database";
  * GET API Route
  * Fetches the details of a specific prompt based on the provided parameters.
  */
-export const GET = async (request, { params }) => {
+export const GET = async ({ params }) => {
   try {
     await connectToDB(); // Ensure the database connection is established
 
     // Fetch the prompt from the database using the provided params
-    const prompt = await Prompt.find(params[1]).populate("creator");
+    const prompt = await Prompt.find(params).populate("creator");
 
     if (!prompt) {
       return new Response("Prompt Not Found", { status: 404 }); // Return 404 if no prompt is found
