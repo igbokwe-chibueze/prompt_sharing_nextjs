@@ -7,7 +7,7 @@ import Loading from "@app/profile/loading";
 
 const PromptCardList = ({ data, handleTagClick }) => {
   return (
-    <div className='mt-16 prompt_layout'>
+    <div className='mt-6 prompt_layout'>
       <Suspense fallback={<Loading />}>
         {data.map((post) => (
           <PromptCard

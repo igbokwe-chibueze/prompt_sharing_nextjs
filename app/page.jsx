@@ -1,4 +1,5 @@
 import Feed from "@components/Feed"
+import UserPictures from "@components/UserPictures"
 
 
 const Home = () => {
@@ -14,6 +15,20 @@ const Home = () => {
             discover, create and share creative prompts
         </p>
 
+        {/* UserPictures component displays random user pictures */}
+        <div className="flex items-center space-x-2 mt-4">
+          <div className="flex flex-col items-center space-y-4">
+            <p className="desc">Join millions of creators</p>
+            <UserPictures/>
+          </div>
+
+          <div className="flex flex-col items-center space-y-4">
+            <p className="desc">Top creators</p>
+            <UserPictures/>
+          </div>
+        </div>
+
+        {/* Feed component displays prompts */}
         <Feed />
     </section>
   )
