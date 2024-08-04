@@ -33,17 +33,20 @@ const MyProfile = () => {
     );
 
     if (hasConfirmed) {
-      try {
-        await fetch(`/api/prompt/${post._id.toString()}`, {
-          method: "DELETE",
-        });
+        try {
+            const response = await fetch(`/api/prompt/${post._id.toString()}`, {
+                method: "DELETE",
+            });
 
-        const filteredPosts = myPosts.filter((item) => item._id !== post._id); //filters out the deleted post and only return posts that are not the deleted post.
-
-        setMyPosts(filteredPosts); // Set the posts to the filterd posts.
-      } catch (error) {
-        console.log(error);
-      }
+            if (response.ok) {
+                const filteredPosts = myPosts.filter((item) => item._id !== post._id);
+                setMyPosts(filteredPosts);
+            } else {
+                console.error("Failed to delete post:", response.statusText);
+            }
+        } catch (error) {
+            console.log("Error deleting post:", error);
+        }
     }
   };
 

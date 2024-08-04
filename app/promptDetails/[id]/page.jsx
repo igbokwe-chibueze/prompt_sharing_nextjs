@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import PromptCard from "@components/PromptCard";
 
 /**
  * PromptDetails Component
@@ -13,6 +14,7 @@ const PromptDetails = ({ params }) => {
   const [prompt, setPrompt] = useState(null); // State to store prompt data
   const [loading, setLoading] = useState(true); // State to manage loading state
   const { data: session } = useSession(); // Access session data for authentication
+  const pathName = usePathname(); // Get the current route path
   const router = useRouter(); // Next.js router for navigation
 
   // Handles profile click - navigates to user's profile
@@ -51,6 +53,32 @@ const PromptDetails = ({ params }) => {
     return <div>No prompt found</div>; // Show message if no prompt is found
   }
 
+  const handleEdit = (prompt) => {
+    router.push(`/update-prompt?id=${prompt._id}`);
+  };
+
+  const handleDelete = async (post) => {
+    const hasConfirmed = confirm(
+      "Are you sure you want to delete this prompt?"
+    );
+
+    if (hasConfirmed) {
+        try {
+          const response = await fetch(`/api/prompt/${post._id.toString()}`, {
+            method: "DELETE",
+          });
+
+          if (!response.ok) {
+            console.error("Failed to delete post:", response.statusText);
+          }
+        } catch (error) {
+          console.log("Error deleting post:", error);
+        }
+    }
+
+    router.push("/")
+  };
+
   return (
     <section>
       <h1 className="head_text text-left">
@@ -58,44 +86,13 @@ const PromptDetails = ({ params }) => {
       </h1>
 
       <div className="mt-10">
-        <div className="prompt_card">
-          {/* User information and profile navigation */}
-          <div
-            className="flex justify-start items-center gap-5 cursor-pointer"
-            onClick={handleProfileClick}
-          >
-            <Image
-              src={prompt.creator.image}
-              alt="user_image"
-              width={50}
-              height={50}
-              className="rounded-full object-contain"
-            />
-            <div className="flex flex-col">
-              <h3 className="font-satoshi font-semibold text-gray-900">
-                {prompt.creator.username}
-              </h3>
-              <p className="font-inter text-sm text-gray-500">
-                {prompt.creator.email}
-              </p>
-            </div>
-          </div>
-
-          {/* Prompt content */}
-          <div className="my-5">
-            <p className="my-4 font-satoshi text-sm text-gray-700">
-              {prompt.prompt}
-            </p>
-            <p className="font-inter text-sm text-gray-500">
-              Created At: {new Date(prompt.createdAt).toLocaleString()}
-            </p>
-          </div>
-
-          {/* Tag */}
-          <div className="font-inter text-sm blue_gradient">
-            #{prompt.tag}
-          </div>
-        </div>
+        <PromptCard
+          key={prompt._id}
+          post={prompt}
+          handleEdit={() => handleEdit && handleEdit(prompt)}
+          handleDelete={() => handleDelete && handleDelete(prompt)}
+        />
+        
       </div>
 
       

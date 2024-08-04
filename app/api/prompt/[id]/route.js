@@ -16,7 +16,7 @@ export const GET = async (request, { params }) => {
 }
 
 export const PATCH = async (request, { params }) => {
-    const { prompt, tag } = await request.json();
+    const { prompt, tags } = await request.json();
 
     try {
         await connectToDB();
@@ -30,7 +30,7 @@ export const PATCH = async (request, { params }) => {
 
         // Update the prompt with new data
         existingPrompt.prompt = prompt;
-        existingPrompt.tag = tag;
+        existingPrompt.tags = tags;
 
         await existingPrompt.save();
 
@@ -43,9 +43,9 @@ export const PATCH = async (request, { params }) => {
 export const DELETE = async (request, { params }) => {
     try {
         await connectToDB();
-
+        
         // Find the prompt by ID and remove it
-        await Prompt.findByIdAndRemove(params.id);
+        await Prompt.findByIdAndDelete(params.id);
 
         return new Response("Prompt deleted successfully", { status: 200 });
     } catch (error) {

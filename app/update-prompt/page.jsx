@@ -11,7 +11,7 @@ const UpdatePromptComponent = () => {
   const searchParams = useSearchParams();
   const promptId = searchParams.get("id");
 
-  const [post, setPost] = useState({ prompt: "", tag: "" });
+  const [post, setPost] = useState({ prompt: "", tags: [] });
   const [submitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ const UpdatePromptComponent = () => {
 
       setPost({
         prompt: data.prompt,
-        tag: data.tag,
+        tags: data.tags,
       });
     };
 
@@ -39,7 +39,7 @@ const UpdatePromptComponent = () => {
         method: "PATCH",
         body: JSON.stringify({
           prompt: post.prompt,
-          tag: post.tag,
+          tags: post.tags,
         }),
       });
 

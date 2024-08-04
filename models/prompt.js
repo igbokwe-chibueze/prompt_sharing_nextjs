@@ -10,9 +10,9 @@ const PromptSchema = new Schema({
     type: String,
     required: [true, 'Prompt is required.'],
   },
-  tag: {
-    type: String,
-    required: [true, 'Tag is required.'],
+  tags: {
+    type: [String],
+    required: [true, 'At least one tag is required.'],
   },
   likes: {
     type: [Schema.Types.ObjectId],

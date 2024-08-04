@@ -23,11 +23,9 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
   // Handles profile click - shows login popup if not logged in
   const handleProfileClick = () => {
     if (!session) {
-      // setPopupMessage("You need to be logged in to view this profile. Please log in to continue.");
-      // setShowLoginPopup(true); // Show the login popup
-
+      // Redirect to login page with message
       const message = "You need to be logged in to view this profile. Please log in to continue.";
-      router.push(`/login?message=${message}`)
+      router.push(`/login?message=${message}`);
       return;
     }
     
@@ -41,11 +39,9 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
   // Handles prompt click - shows login popup if not logged in
   const handlePromptClick = () => {
     if (!session) {
-      //setPopupMessage("Sorry need to be logged in to view prompt details. Please log in to continue.");
-      //setShowLoginPopup(true); // Show the login popup
-
+      // Redirect to login page with message
       const message = "Sorry need to be logged in to view prompt details. Please log in to continue.";
-      router.push(`/login?message=${message}`)
+      router.push(`/login?message=${message}`);
       return;
     }
     router.push(`/promptDetails/${post._id}`);
@@ -57,6 +53,9 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
     navigator.clipboard.writeText(post.prompt);
     setTimeout(() => setCopied(""), 3000); // Reset copied state after 3 seconds
   };
+
+  // Check if the post has been updated
+  const isUpdated = post.updatedAt && post.updatedAt !== post.createdAt;
 
   return (
     <div className="prompt_card">
@@ -111,16 +110,28 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
         Created At: {new Date(post.createdAt).toLocaleString()}
       </p>
 
+      {/* Conditionally render updated at information */}
+      {isUpdated && (
+        <p className="mt-2 font-inter text-sm text-gray-500">
+          Updated At: {new Date(post.updatedAt).toLocaleDateString()}
+        </p>
+      )}
+
       {/* Tag with click functionality */}
-      <p
-        className="font-inter text-sm blue_gradient cursor-pointer"
-        onClick={() => handleTagClick && handleTagClick(post.tag)}
-      >
-        #{post.tag}
-      </p>
+      <div className="flex justify-start items-center flex-wrap gap-2 mt-2">
+        {post.tags.map((tag, index) => (
+          <p
+            key={index}
+            className="font-inter text-sm blue_gradient cursor-pointer"
+            onClick={() => handleTagClick && handleTagClick(tag)}
+          >
+            #{tag}
+          </p>
+        ))}
+      </div>
 
       {/* Edit and Delete buttons for creator on profile page */}
-      {session?.user.id === post.creator._id && pathName === "/profile" && (
+      {session?.user.id === post.creator._id && pathName !== "/" && (
         <div className="mt-5 flex-center gap-4 border-t border-gray-100 pt-3">
           <p
             className="font-inter text-sm green_gradient cursor-pointer"
@@ -138,7 +149,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
       )}
 
       {/* Login Popup */}
-      {showLoginPopup && <LoginPopup message={popupMessage} onClose={() => setShowLoginPopup(false)} />}
+      {/* {showLoginPopup && <LoginPopup message={popupMessage} onClose={() => setShowLoginPopup(false)} />} */}
     </div>
   );
 };
