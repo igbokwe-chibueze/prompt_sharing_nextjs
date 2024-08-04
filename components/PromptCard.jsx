@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import LoginPopup from "./LoginPopup"; // Import the LoginPopup component
+import { HeartFilledIcon, HeartIcon } from "@constants/icons";
 
 /**
  * PromptCard Component
@@ -17,8 +18,15 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
   const router = useRouter(); // Next.js router for navigation
 
   const [copied, setCopied] = useState(""); // State to manage copied prompt
-  const [showLoginPopup, setShowLoginPopup] = useState(false); // State to manage popup visibility
-  const [popupMessage, setPopupMessage] = useState(""); // State to manage popup message
+
+  //const [showLoginPopup, setShowLoginPopup] = useState(false); // State to manage popup visibility
+  //const [popupMessage, setPopupMessage] = useState(""); // State to manage popup message
+
+  // State to manage if the prompt is liked by the current user
+  const [liked, setLiked] = useState(post.likes.includes(session?.user.id));
+  // State to manage the number of likes
+  const [likeCount, setLikeCount] = useState(post.likes.length);
+  const [isLiking, setIsLiking] = useState(false); // State for managing liking action
 
   // Handles profile click - shows login popup if not logged in
   const handleProfileClick = () => {
@@ -53,6 +61,77 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
     navigator.clipboard.writeText(post.prompt);
     setTimeout(() => setCopied(""), 3000); // Reset copied state after 3 seconds
   };
+
+
+  // Handles liking or unliking the prompt
+  // const handleLike = async () => {
+  //   // Redirect to login if not authenticated
+  //   if (!session) {
+  //     router.push(`/login?message=Please log in to like this prompt.`);
+  //     return;
+  //   }
+
+  //   try {
+  //     // Send PATCH request to update like status
+  //     const response = await fetch(`/api/prompt/${post._id}/like`, {
+  //       method: "PATCH",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ userId: session.user.id }),
+  //     });
+
+  //     // Parse the updated prompt data
+  //     const updatedPost = await response.json();
+
+  //     // Update local state to reflect new like status and count
+  //     setLiked(!liked);
+  //     setLikeCount(updatedPost.likes.length);
+  //   } catch (error) {
+  //     // Log any errors
+  //     console.error("Error updating like:", error);
+  //   } finally {
+  //     setIsLiking(false);
+  //   }
+  // };
+
+  const handleLike = async () => {
+    if (!session) {
+        router.push(`/login?message=You need to be logged in to like this post.`);
+        return;
+    }
+
+    const newLikedStatus = !liked;
+    setLiked(newLikedStatus); // Optimistically update the icon
+    setIsLiking(true);
+
+    try {
+        const response = await fetch(`/api/prompt/${post._id}/like`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                userId: session.user.id,
+                like: newLikedStatus
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to update like");
+        }
+
+        const data = await response.json();
+        setLikeCount(data.likes); // Update like count only after successful response
+    } catch (error) {
+        console.log("Error:", error);
+        // Revert icon state on failure
+        setLiked(!newLikedStatus);
+    } finally {
+        setIsLiking(false);
+    }
+};
+
 
   // Check if the post has been updated
   const isUpdated = post.updatedAt && post.updatedAt !== post.createdAt;
@@ -128,6 +207,14 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
             #{tag}
           </p>
         ))}
+      </div>
+
+      {/* Like Button */}
+      <div className="like_btn" onClick={handleLike} disabled={isLiking}>
+        {liked ? <HeartFilledIcon className={" w-6 h-6 text-gray-800 dark:text-white"}/> 
+          : <HeartIcon className={"w-6 h-6 text-gray-800 dark:text-white"}/>
+        }
+        <p>{likeCount}</p>
       </div>
 
       {/* Edit and Delete buttons for creator on profile page */}

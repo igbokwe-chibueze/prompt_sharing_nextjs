@@ -168,3 +168,14 @@
 .flex-between {
   @apply flex justify-between items-center;
 }
+
+/* Like btn */
+.like_btn {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.like_btn p {
+  margin-left: 5px;
+}

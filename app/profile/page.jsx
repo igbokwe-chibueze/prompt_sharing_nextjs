@@ -11,17 +11,29 @@ const MyProfile = () => {
   const { data: session } = useSession();
 
   const [myPosts, setMyPosts] = useState([]);
+  const [likedPosts, setLikedPosts] = useState([]);
 
   useEffect(() => {
     const fetchPosts = async () => {
+      // Fetch user's own posts
       const response = await fetch(`/api/users/${session?.user.id}/posts`);
       const data = await response.json();
-
       setMyPosts(data);
     };
 
-    if (session?.user.id) fetchPosts();
+    const fetchLikedPosts = async () => {
+      // Fetch posts liked by the user
+      const response = await fetch(`/api/users/${session?.user.id}/liked-posts`);
+      const data = await response.json();
+      setLikedPosts(data);
+    };
+
+    if (session?.user.id) {
+      fetchPosts();
+      fetchLikedPosts();
+    }
   }, [session?.user.id]);
+  
 
   const handleEdit = (post) => {
     router.push(`/update-prompt?id=${post._id}`);
@@ -51,13 +63,21 @@ const MyProfile = () => {
   };
 
   return (
-    <Profile
-      name='My'
-      desc='Welcome to your personalized profile page. Share your exceptional prompts and inspire others with the power of your imagination'
-      data={myPosts}
-      handleEdit={handleEdit}
-      handleDelete={handleDelete}
-    />
+    <section className='w-full'>
+      <h1 className='head_text text-left'>
+        <span className='blue_gradient'>My Profile</span>
+      </h1>
+      <p className='desc text-left'>Welcome to your personalized profile page. Share your exceptional prompts and inspire others with the power of your imagination</p>
+
+      <Profile
+        name='My'
+        desc='Welcome to your personalized profile page. Share your exceptional prompts and inspire others with the power of your imagination'
+        data={myPosts}
+        likes={likedPosts}
+        handleEdit={handleEdit}
+        handleDelete={handleDelete}
+      />
+    </section>
   );
 };
 

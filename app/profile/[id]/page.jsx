@@ -23,11 +23,18 @@ const UserProfile = ({ params }) => {
   }, [params.id]);
 
   return (
-    <Profile
-      name={userName}
-      desc={`Welcome to ${userName}'s personalized profile page. Explore ${userName}'s exceptional prompts and be inspired by the power of their imagination`}
-      data={userPosts}
-    />
+    <section className='w-full'>
+      <h1 className='head_text text-left'>
+        <span className='blue_gradient'>{userName} Profile</span>
+      </h1>
+      <p className='desc text-left'>{`Welcome to ${userName}'s personalized profile page. Explore ${userName}'s exceptional prompts and be inspired by the power of their imagination`}</p>
+
+      <Profile
+        name={userName}
+        desc={`Welcome to ${userName}'s personalized profile page. Explore ${userName}'s exceptional prompts and be inspired by the power of their imagination`}
+        data={userPosts}
+      />
+    </section>
   );
 };
 
