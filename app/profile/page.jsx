@@ -12,6 +12,7 @@ const MyProfile = () => {
 
   const [myPosts, setMyPosts] = useState([]);
   const [likedPosts, setLikedPosts] = useState([]);
+  const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -28,9 +29,16 @@ const MyProfile = () => {
       setLikedPosts(data);
     };
 
+    const fetchBookmarkedPosts = async () => {
+      const response = await fetch(`/api/users/${session?.user.id}/bookmarked-prompts`);
+      const data = await response.json();
+      setBookmarkedPosts(data);
+    };
+
     if (session?.user.id) {
       fetchPosts();
       fetchLikedPosts();
+      fetchBookmarkedPosts();
     }
   }, [session?.user.id]);
   
@@ -74,6 +82,7 @@ const MyProfile = () => {
         desc='Welcome to your personalized profile page. Share your exceptional prompts and inspire others with the power of your imagination'
         data={myPosts}
         likes={likedPosts}
+        bookmarks={bookmarkedPosts}
         handleEdit={handleEdit}
         handleDelete={handleDelete}
       />

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import LoginPopup from "./LoginPopup"; // Import the LoginPopup component
-import { HeartFilledIcon, HeartIcon } from "@constants/icons";
+import { BookmarkFilledIcon, BookmarkIcon, HeartFilledIcon, HeartIcon } from "@constants/icons";
 
 /**
  * PromptCard Component
@@ -27,6 +27,11 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
   // State to manage the number of likes
   const [likeCount, setLikeCount] = useState(post.likes.length);
   const [isLiking, setIsLiking] = useState(false); // State for managing liking action
+
+  const [isBookmarked, setIsBookmarked] = useState(post.bookmarks.includes(session?.user.id)); // State to manage if the prompt is bookmarked
+  // State to manage the number of likes
+  const [bookmarkCount, setBookmarkCount] = useState(post.bookmarks.length);
+  const [isBookmarking, setIsBookmarking] = useState(false); // State for managing liking action
 
   // Handles profile click - shows login popup if not logged in
   const handleProfileClick = () => {
@@ -61,39 +66,6 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
     navigator.clipboard.writeText(post.prompt);
     setTimeout(() => setCopied(""), 3000); // Reset copied state after 3 seconds
   };
-
-
-  // Handles liking or unliking the prompt
-  // const handleLike = async () => {
-  //   // Redirect to login if not authenticated
-  //   if (!session) {
-  //     router.push(`/login?message=Please log in to like this prompt.`);
-  //     return;
-  //   }
-
-  //   try {
-  //     // Send PATCH request to update like status
-  //     const response = await fetch(`/api/prompt/${post._id}/like`, {
-  //       method: "PATCH",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ userId: session.user.id }),
-  //     });
-
-  //     // Parse the updated prompt data
-  //     const updatedPost = await response.json();
-
-  //     // Update local state to reflect new like status and count
-  //     setLiked(!liked);
-  //     setLikeCount(updatedPost.likes.length);
-  //   } catch (error) {
-  //     // Log any errors
-  //     console.error("Error updating like:", error);
-  //   } finally {
-  //     setIsLiking(false);
-  //   }
-  // };
 
   const handleLike = async () => {
     if (!session) {
@@ -130,10 +102,50 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
     } finally {
         setIsLiking(false);
     }
-};
+  };
+
+
+  const handleBookmark = async () => {
+    if (!session) {
+        router.push(`/login?message=You need to be logged in to bookmark this post.`);
+        return;
+    }
+
+    const newBookmarkedStatus = !isBookmarked;
+    setIsBookmarked(newBookmarkedStatus); // Optimistically update the icon
+    setIsBookmarking(true);
+
+    try {
+        const response = await fetch(`/api/prompt/${post._id}/bookmark`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                userId: session.user.id,
+                bookmark: newBookmarkedStatus
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to update bookmark");
+        }
+
+        const data = await response.json();
+        setBookmarkCount(data.bookmarks); // Update bookmark count only after successful response
+    } catch (error) {
+        console.log("Error:", error);
+        // Revert icon state on failure
+        setIsBookmarked(!newBookmarkedStatus);
+    } finally {
+        setIsBookmarking(false);
+    }
+  };
+ 
 
 
   // Check if the post has been updated
+  
   const isUpdated = post.updatedAt && post.updatedAt !== post.createdAt;
 
   return (
@@ -215,6 +227,14 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
           : <HeartIcon className={"w-6 h-6 text-gray-800 dark:text-white"}/>
         }
         <p>{likeCount}</p>
+      </div>
+
+      {/* Bookmark Button */}
+      <div className="mt-4 bookmark_btn" onClick={handleBookmark}>
+        {isBookmarked ? <BookmarkFilledIcon className={"w-6 h-6 text-gray-800 dark:text-white"}/> 
+          : <BookmarkIcon className={"w-6 h-6 text-gray-800 dark:text-white"}/>
+        }
+        <p>{bookmarkCount}</p>
       </div>
 
       {/* Edit and Delete buttons for creator on profile page */}

@@ -179,3 +179,14 @@
 .like_btn p {
   margin-left: 5px;
 }
+
+/* Like btn */
+.bookmark_btn {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.bookmark_btn p {
+  margin-left: 5px;
+}

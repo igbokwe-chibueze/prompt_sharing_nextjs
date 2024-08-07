@@ -19,6 +19,11 @@ const PromptSchema = new Schema({
     ref: 'User',
     default: [],
   },
+  bookmarks: {
+    type: [Schema.Types.ObjectId],
+    ref: 'User',
+    default: [],
+  },
 }, { timestamps: true });
 
 const Prompt = models.Prompt || model('Prompt', PromptSchema);
