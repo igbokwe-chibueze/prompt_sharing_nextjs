@@ -1,6 +1,6 @@
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { StarFilledIcon, StarHalfFilledIcon, CloseFilledIcon } from "@constants/icons";
-import { useRouter } from "next/navigation";
 
 const Rating = ({ post, session }) => {
 
@@ -64,7 +64,7 @@ const Rating = ({ post, session }) => {
     };
 
   return (
-    <div>
+    <>
       {/* Display average rating */}
       <div className="rating_section flex">
         <button
@@ -126,7 +126,7 @@ const Rating = ({ post, session }) => {
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 };
 

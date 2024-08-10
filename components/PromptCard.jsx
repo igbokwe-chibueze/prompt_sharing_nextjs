@@ -6,6 +6,9 @@ import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { BookmarkIcon, CloseFilledIcon, HeartIcon, StarFilledIcon, StarHalfFilledIcon, } from "@constants/icons";
 import Rating from "./Rating";
+import Bookmarking from "./Bookmarking";
+import Liking from "./Liking";
+import Copy from "./Copy";
 
 /**
  * PromptCard Component
@@ -16,19 +19,6 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
   const { data: session } = useSession(); // Access session data for authentication
   const pathName = usePathname(); // Get the current route path
   const router = useRouter(); // Next.js router for navigation
-
-  const [copied, setCopied] = useState(""); // State to manage copied prompt
-
-  // State to manage if the prompt is liked by the current user
-  const [liked, setLiked] = useState(post.likes.includes(session?.user.id));
-  // State to manage the number of likes
-  const [likeCount, setLikeCount] = useState(post.likes.length);
-  const [isLiking, setIsLiking] = useState(false); // State for managing liking action
-
-  const [isBookmarked, setIsBookmarked] = useState(post.bookmarks.includes(session?.user.id)); // State to manage if the prompt is bookmarked
-  // State to manage the number of bookmarks
-  const [bookmarkCount, setBookmarkCount] = useState(post.bookmarks.length);
-  const [isBookmarking, setIsBookmarking] = useState(false); // State for managing liking action
 
 
   // Handles profile click - shows login popup if not logged in
@@ -59,93 +49,8 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
     router.push(`/promptDetails/${post._id}`);
   };
 
-
-  // Handles copying the prompt text to clipboard
-  const handleCopy = () => {
-    setCopied(post.prompt);
-    navigator.clipboard.writeText(post.prompt);
-    setTimeout(() => setCopied(""), 3000); // Reset copied state after 3 seconds
-  };
-
-
-  const handleLike = async () => {
-    if (!session) {
-        router.push(`/login?message=You need to be logged in to like this post.`);
-        return;
-    }
-
-    const newLikedStatus = !liked;
-    setLiked(newLikedStatus); // Optimistically update the icon
-    setIsLiking(true);
-
-    try {
-        const response = await fetch(`/api/prompt/${post._id}/like`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                userId: session.user.id,
-                like: newLikedStatus
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to update like");
-        }
-
-        const data = await response.json();
-        setLikeCount(data.likes); // Update like count only after successful response
-    } catch (error) {
-        console.log("Error:", error);
-        // Revert icon state on failure
-        setLiked(!newLikedStatus);
-    } finally {
-        setIsLiking(false);
-    }
-  };
-
-
-  const handleBookmark = async () => {
-    if (!session) {
-        router.push(`/login?message=You need to be logged in to bookmark this post.`);
-        return;
-    }
-
-    const newBookmarkedStatus = !isBookmarked;
-    setIsBookmarked(newBookmarkedStatus); // Optimistically update the icon
-    setIsBookmarking(true);
-
-    try {
-        const response = await fetch(`/api/prompt/${post._id}/bookmark`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                userId: session.user.id,
-                bookmark: newBookmarkedStatus
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to update bookmark");
-        }
-
-        const data = await response.json();
-        setBookmarkCount(data.bookmarks); // Update bookmark count only after successful response
-    } catch (error) {
-        console.log("Error:", error);
-        // Revert icon state on failure
-        setIsBookmarked(!newBookmarkedStatus);
-    } finally {
-        setIsBookmarking(false);
-    }
-  };
-
  
-  // Check if the post has been updated
-  
+  // Check if the post has been updated/edited
   const isUpdated = post.updatedAt && post.updatedAt !== post.createdAt;
 
   return (
@@ -174,18 +79,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
         </div>
 
         {/* Copy button */}
-        <div className="copy_btn" onClick={handleCopy}>
-          <Image
-            src={
-              copied === post.prompt
-                ? "/assets/icons/tick.svg"
-                : "/assets/icons/copy.svg"
-            }
-            alt={copied === post.prompt ? "tick_icon" : "copy_icon"}
-            width={12}
-            height={12}
-          />
-        </div>
+        <Copy post={post}/>
       </div>
 
       {/* Prompt text and navigation to details */}
@@ -222,16 +116,10 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
       </div>
 
       {/* Like Button */}
-      <div className="like_btn" onClick={handleLike} disabled={isLiking}>
-        <HeartIcon className={`text-gray-800 ${liked ? "fill-gray-800" : "hover:fill-gray-800"}`}/>
-        <p>{likeCount}</p>
-      </div>
+      <Liking post={post} session={session}/>
 
       {/* Bookmark Button */}
-      <div className="mt-4 bookmark_btn" onClick={handleBookmark} disabled={isBookmarking}>
-        <BookmarkIcon className={`text-gray-800 ${isBookmarked ? "fill-gray-800" : "hover:fill-gray-800"}`}/>
-        <p>{bookmarkCount}</p>
-      </div>
+      <Bookmarking post={post} session={session}/>
 
       {/* Rating */}
       <Rating post={post} session={session}/>
