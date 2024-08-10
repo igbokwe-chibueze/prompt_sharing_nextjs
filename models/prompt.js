@@ -1,4 +1,5 @@
 import { Schema, model, models } from 'mongoose';
+import RatingSchema from './rating';
 
 const PromptSchema = new Schema({
   creator: {
@@ -23,6 +24,11 @@ const PromptSchema = new Schema({
     type: [Schema.Types.ObjectId],
     ref: 'User',
     default: [],
+  },
+  ratings: [RatingSchema],
+  averageRating: {
+    type: Number,
+    default: 0, // Default value for averageRating
   },
 }, { timestamps: true });
 
