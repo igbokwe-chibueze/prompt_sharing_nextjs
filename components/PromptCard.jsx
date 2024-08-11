@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
-import { BookmarkIcon, CloseFilledIcon, HeartIcon, StarFilledIcon, StarHalfFilledIcon, } from "@constants/icons";
 import Rating from "./Rating";
 import Bookmarking from "./Bookmarking";
 import Liking from "./Liking";
 import Copy from "./Copy";
+import Sharing from "./sharing/Sharing";
 
 /**
  * PromptCard Component
@@ -123,6 +122,8 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
 
       {/* Rating */}
       <Rating post={post} session={session}/>
+
+      <Sharing post={post}/>
 
       {session?.user.id === post.creator._id && pathName !== "/" && (
         <div className="mt-5 flex-center gap-4 border-t border-gray-100 pt-3">
