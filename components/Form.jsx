@@ -105,7 +105,7 @@ const Form = ({ type, post, setPost, submitting, handleSubmit }) => {
             onClick={addTagField}
             className='px-5 py-1.5 text-sm bg-primary-orange rounded-full text-white w-fit'
           >
-           + Add Tags
+           + Add More Tags
           </button>
         </div>
 

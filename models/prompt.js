@@ -1,5 +1,6 @@
 import { Schema, model, models } from 'mongoose';
 import RatingSchema from './rating';
+import RepostSchema from './repost';
 
 const PromptSchema = new Schema({
   creator: {
@@ -30,6 +31,7 @@ const PromptSchema = new Schema({
     type: Number,
     default: 0, // Default value for averageRating
   },
+  reposts: [RepostSchema],
 }, { timestamps: true });
 
 const Prompt = models.Prompt || model('Prompt', PromptSchema);

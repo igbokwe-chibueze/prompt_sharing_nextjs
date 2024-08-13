@@ -8,6 +8,7 @@ import Bookmarking from "./Bookmarking";
 import Liking from "./Liking";
 import Copy from "./Copy";
 import Sharing from "./sharing/Sharing";
+import Reposting from "./Reposting";
 
 /**
  * PromptCard Component
@@ -122,8 +123,12 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
 
       {/* Rating */}
       <Rating post={post} session={session}/>
-
+      
+      {/* Sharing */}
       <Sharing post={post}/>
+      
+      {/* Reposting */}
+      <Reposting post={post} session={session}/>
 
       {session?.user.id === post.creator._id && pathName !== "/" && (
         <div className="mt-5 flex-center gap-4 border-t border-gray-100 pt-3">
