@@ -1,14 +1,13 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 import PromptCard from "./PromptCard";
 import { RepeatIcon } from "@constants/icons";
 
 const RepostCard = ({ repost, originalPost, handleTagClick }) => {
     const { data: session } = useSession(); // Access session data for authentication
-    const pathName = usePathname(); // Get the current route path
     const router = useRouter(); // Next.js router for navigation
 
     const handleProfileClick = () => {

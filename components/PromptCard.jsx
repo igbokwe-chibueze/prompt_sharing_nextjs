@@ -92,7 +92,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
 
       {/* Created at information */}
       <p className="font-inter text-sm text-gray-500">
-        Created At: {new Date(post.createdAt).toLocaleString()}
+        Created At: {new Date(post.createdAt).toLocaleDateString()}
       </p>
 
       {/* Conditionally render updated at information */}

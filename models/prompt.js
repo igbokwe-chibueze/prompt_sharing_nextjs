@@ -32,7 +32,15 @@ const PromptSchema = new Schema({
     default: 0, // Default value for averageRating
   },
   reposts: [RepostSchema],
-}, { timestamps: true });
+  createdAt: {
+    type: Date,
+    default: null,
+  },
+  updatedAt: {
+    type: Date,
+    default: null,
+  },
+});
 
 const Prompt = models.Prompt || model('Prompt', PromptSchema);
 

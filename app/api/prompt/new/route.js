@@ -17,6 +17,7 @@ export const POST = async (request) => {
       creator: userId,
       prompt,
       tags, // Ensure tags is an array
+      createdAt: new Date(),
     });
 
     await newPrompt.save();
