@@ -4,17 +4,37 @@ import { useState, useEffect, Suspense } from "react";
 
 import PromptCard from "./PromptCard";
 import Loading from "@app/profile/loading";
+import RepostCard from "./RepostCard";
 
 const PromptCardList = ({ data, handleTagClick }) => {
   return (
     <div className='mt-6 prompt_layout'>
-      <Suspense fallback={<Loading />}>
+      {/* <Suspense fallback={<Loading />}>
         {data.map((post) => (
           <PromptCard
             key={post._id}
             post={post}
             handleTagClick={handleTagClick}
           />
+        ))}
+      </Suspense> */}
+
+      <Suspense fallback={<Loading />}>
+        {data.map((post) => (
+          <div key={post._id} className="relative space-y-6 py-8">
+            <PromptCard
+              post={post}
+              handleTagClick={handleTagClick}
+            />
+            {post.reposts?.map((repost, index) => (
+              <RepostCard
+                originalPost={post}
+                key={index}
+                repost={repost}
+                handleTagClick={handleTagClick}
+              />
+            ))}
+          </div>
         ))}
       </Suspense>
     </div>

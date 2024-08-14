@@ -115,6 +115,13 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
         ))}
       </div>
 
+      {/* <p>{post.reposts[0]?.repostedBy.username}</p> */}
+      <div>
+        {post.reposts?.map((p) => (
+          <p>{p.repostedBy?.username}</p>
+        ))}
+      </div>
+
       {/* Like Button */}
       <Liking post={post} session={session}/>
 

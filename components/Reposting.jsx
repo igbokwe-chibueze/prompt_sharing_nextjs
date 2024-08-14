@@ -1,15 +1,24 @@
 import { RepeatIcon } from "@constants/icons";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const Reposting = ({ post, session }) => {
 
     const router = useRouter(); // Next.js router for navigation
 
-    const [isReposted, setIsReposted] = useState(post.reposts?.find(repostObject => repostObject.repostedBy.toString() === session?.user.id));
+    const [isReposted, setIsReposted] = useState(null);
     // State to manage the number of bookmarks
     const [repostCount, setRepostCount] = useState(post.reposts.length);
     const [isRepostting, setIsRepostting] = useState(false);
+
+    useEffect(() => {
+        if (session) {
+            const userId = session.user.id;
+            const existingRepost = post.reposts.find(repostObject => repostObject.repostedBy?._id?.toString()=== userId);
+
+            setIsReposted(existingRepost)
+        }
+    }, [post, session]);
 
     const handleRepost = async () => {
         if (!session) {
@@ -51,8 +60,8 @@ const Reposting = ({ post, session }) => {
   return (
     <>
         <div className="mt-4 bookmark_btn" onClick={handleRepost} disabled={isRepostting}>
-            <RepeatIcon className={`text-gray-800 ${isReposted ? "text-green-600" : "hover:text-green-800"}`}/>
-            {/* <span className="text-green-600">{`${isReposted ? "Resposted" : "Repost"}`}</span> */}
+            <RepeatIcon className={`text-gray-800  ${isReposted ? "text-green-600" : "rounded-full hover:bg-green-200 hover:text-green-800"}`}/>
+            <span className="text-green-600">{`${isReposted ? "Resposted" : "Repost"}`}</span>
             <p>{repostCount}</p>
         </div>
     </>

@@ -19,6 +19,7 @@ export const POST = async (request, { params }) => {
         // Check if the user has already reposted the prompt
         const existingRepost = prompt.reposts.find(repostObject => repostObject.repostedBy.toString() === userId);
 
+        console.log(repost)
         // User wants to repost the prompt
         if (repost) {
             // If user has not reposted before
@@ -30,30 +31,9 @@ export const POST = async (request, { params }) => {
                 });
             }
         } else {
-                // User wants to remove the repost, so we remove it
-                prompt.reposts = prompt.reposts.filter(repost => repost.repostedBy.toString() !== userId);
-            }
-
-        
-        
-        // User wants to repost the prompt
-        // if (repost) {
-        //     console.log("Yes 1")
-        //     // If user has not reposted before
-        //     if (!existingRepost) {
-        //         console.log("Yes 2")
-        //         // We create a repost
-        //         prompt.reposts.push({
-        //             repostedBy: userId,
-        //             repostedAt: new Date(),
-        //         });
-        //     } else {
-        //         // User wants to remove the repost, so we remove it
-        //         //prompt.reposts = existingRepost.filter(id => id.toString() !== userId);
-        //         console.log("Delete it here")
-        //     }
-        // }
-
+            // User wants to remove the repost, so we remove it
+            prompt.reposts = prompt.reposts.filter(repost => repost.repostedBy.toString() !== userId);
+        }
 
         await prompt.save();
 
