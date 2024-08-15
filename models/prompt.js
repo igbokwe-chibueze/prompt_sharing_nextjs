@@ -32,6 +32,14 @@ const PromptSchema = new Schema({
     default: 0, // Default value for averageRating
   },
   reposts: [RepostSchema],
+  profileClickCount: {
+    type: Number,
+    default: 0,
+  },
+  promptClickCount: {
+    type: Number,
+    default: 0,
+  },
   createdAt: {
     type: Date,
     default: null,

@@ -9,6 +9,8 @@ import Liking from "./Liking";
 import Copy from "./Copy";
 import Sharing from "./sharing/Sharing";
 import Reposting from "./Reposting";
+import PostActivity from "./PostActivity";
+import { useState } from "react";
 
 /**
  * PromptCard Component
@@ -16,20 +18,44 @@ import Reposting from "./Reposting";
  * and provides options for editing, deleting, and copying the prompt.
  */
 const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
+
   const { data: session } = useSession(); // Access session data for authentication
   const pathName = usePathname(); // Get the current route path
   const router = useRouter(); // Next.js router for navigation
 
+  const [profileClickCount, setProfileClickCount] = useState(post.profileClickCount || 0);
+  const [promptClickCount, setPromptClickCount] = useState(post.promptClickCount || 0);
+
+  const [totalEngagements, setTotalEngagements] = useState(0);
+
 
   // Handles profile click - shows login popup if not logged in
-  const handleProfileClick = () => {
+  const handleProfileClick = async () => {
     if (!session) {
       // Redirect to login page with message
       const message = "You need to be logged in to view this profile. Please log in to continue.";
       router.push(`/login?message=${message}`);
       return;
     }
+
+    // Determine if the logged-in user is the creator of the prompt
+    if (post.creator._id !== session.user.id) {
+      // Increment the profile click count if not the creator
+      try {
+        await fetch(`/api/prompt/${post._id}/incrementProfileClick`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
     
+        setProfileClickCount(profileClickCount + 1);
+      } catch (error) {
+        console.log("Error:", error);
+      }
+    }
+
+    // Navigate to the appropriate profile page
     if (post.creator._id === session.user.id) {
       router.push("/profile"); // Navigate to logged-in user's profile
     } else {
@@ -39,13 +65,32 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
 
 
   // Handles prompt click - shows login popup if not logged in
-  const handlePromptClick = () => {
+  const handlePromptClick = async () => {
     if (!session) {
       // Redirect to login page with message
       const message = "Sorry need to be logged in to view prompt details. Please log in to continue.";
       router.push(`/login?message=${message}`);
       return;
     }
+
+    // Determine if the logged-in user is the creator of the prompt
+    if (post.creator._id !== session.user.id) {
+      // Increment the prompt click count if not the creator
+      try {
+        await fetch(`/api/prompt/${post._id}/incrementPromptClick`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+    
+        setPromptClickCount(promptClickCount + 1);
+      } catch (error) {
+        console.log("Error:", error);
+      }
+    }
+
+    // Navigate to the prompt details page
     router.push(`/promptDetails/${post._id}`);
   };
 
@@ -84,8 +129,8 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
 
       {/* Prompt text and navigation to details */}
       <p
-        className="my-4 font-satoshi text-sm text-gray-700 cursor-pointer"
-        onClick={handlePromptClick}
+        className={`my-4 font-satoshi text-sm text-gray-700 ${pathName !== `/promptDetails/${post._id}` ? "cursor-pointer" : ""}`}
+        onClick={pathName !== `/promptDetails/${post._id}` ? handlePromptClick : undefined}
       >
         {post.prompt}
       </p>
@@ -115,7 +160,6 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
         ))}
       </div>
 
-      {/* <p>{post.reposts[0]?.repostedBy.username}</p> */}
       <div>
         {post.reposts?.map((p) => (
           <p>{p.repostedBy?.username}</p>
@@ -136,6 +180,19 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
       
       {/* Reposting */}
       <Reposting post={post} session={session}/>
+
+      {/* Post Activity */}
+      <div className="mt-4 flex justify-start items-center">
+        
+        <PostActivity post={post} session={session} setEngagements={setTotalEngagements}/>
+
+        {/* Display Total Engagements */}
+        {totalEngagements > 0 && (
+          <div className="font-inter text-sm text-gray-600">
+            {totalEngagements}
+          </div>
+        )}
+      </div>
 
       {session?.user.id === post.creator._id && pathName !== "/" && (
         <div className="mt-5 flex-center gap-4 border-t border-gray-100 pt-3">

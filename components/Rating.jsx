@@ -10,14 +10,15 @@ const Rating = ({ post, session }) => {
     const [hoveredRating, setHoveredRating] = useState(null);
     const [currentRating, setCurrentRating] = useState(null);
     const [averageRating, setAverageRating] = useState(Number(post.averageRating) || 0);
+    const [ratingCount, setRatingCount] = useState(post.ratings.length); //Number of times the prompt has been rated or number of users that has rated.
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        if (session) {
+      if (session) {
         const userId = session.user.id;
         const existingRating = post.ratings.find(ratingObject => ratingObject.userId.toString() === userId)?.rating || null;
         setCurrentRating(existingRating);
-        }
+      }
     }, [post, session]);
 
     const handleRate = async (rating) => {
@@ -121,6 +122,8 @@ const Rating = ({ post, session }) => {
                   ))}
                 </div>
                 <p className="font-inter text-sm text-gray-500 mt-4">Your Current Rating: {currentRating || 'None'}</p>
+
+                <p className="font-inter text-sm text-gray-500 mt-4">Number of users who rated this prompt: {ratingCount}</p>
               </div>
             </div>
           </div>
