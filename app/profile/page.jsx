@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Profile from "@components/Profile";
+import UserBio from "@components/UserBio";
 
 const MyProfile = () => {
   const router = useRouter();
@@ -15,6 +16,7 @@ const MyProfile = () => {
   const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
 
   useEffect(() => {
+    
     const fetchPosts = async () => {
       // Fetch user's own posts
       const response = await fetch(`/api/users/${session?.user.id}/posts`);
@@ -35,10 +37,12 @@ const MyProfile = () => {
       setBookmarkedPosts(data);
     };
 
-    if (session?.user.id) {
+    if (session?.user?.id) {
       fetchPosts();
       fetchLikedPosts();
       fetchBookmarkedPosts();
+    } else {
+      console.log("Session user ID is not available yet.");
     }
   }, [session?.user.id]);
   
@@ -72,6 +76,11 @@ const MyProfile = () => {
 
   return (
     <section className='w-full'>
+      
+      {/* Pass the current user's ID to UserBio */}
+      <UserBio userId={session?.user} />
+
+
       <h1 className='head_text text-left'>
         <span className='blue_gradient'>My Profile</span>
       </h1>

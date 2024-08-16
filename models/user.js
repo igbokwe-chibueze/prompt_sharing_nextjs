@@ -14,7 +14,11 @@ const UserSchema = new Schema({
   },
   image: {
     type: String,
-  }
+  },
+  createdAt: {
+    type: Date,
+    default: null,
+  },
 });
 
 const User = models.User || model("User", UserSchema); //checks the models to see if User exists, only create a new model if it dosent.
