@@ -70,15 +70,24 @@ const FollowButton = ({ userId }) => {
             <button
                 onClick={handleFollowToggle}
                 disabled={submitting}
-                className={`mt-2 px-4 py-2 rounded-full 
-                    ${submitting ? "bg-gray-400 cursor-not-allowed" : youFollowThem ? "black_btn" : "outline_btn"}`}
+                className={`group mt-2 px-4 py-2 rounded-full 
+                    ${submitting ? "bg-gray-400 cursor-not-allowed" : youFollowThem ? "black_btn2" : "outline_btn"}`}
             >
                 {submitting ? (
                     <span className="flex items-center space-x-2">
-                        <LoadingIcon className={"animate-spin fill-white"}/>
+                        <LoadingIcon className={"animate-spin fill-white"} />
                         <p>Loading...</p>
                     </span>
-                ) : youFollowThem ? "Unfollow" : "Follow"}
+                ) : (
+                    <>
+                        <span className={`${youFollowThem ? "group-hover:hidden" : ""}`}>
+                            {youFollowThem ? "Following" : "Follow"}
+                        </span>
+                        {youFollowThem && (
+                            <span className="hidden group-hover:inline">Unfollow</span>
+                        )}
+                    </>
+                )}
             </button>
         </div>
     );
