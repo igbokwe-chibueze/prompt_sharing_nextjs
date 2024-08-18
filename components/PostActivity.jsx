@@ -1,5 +1,4 @@
 import { BookmarkIcon, CenterIcon, CloseFilledIcon, HeartIcon, RepeatIcon, StarIcon } from "@constants/icons";
-import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 /**

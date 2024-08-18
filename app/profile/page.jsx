@@ -14,6 +14,7 @@ const MyProfile = () => {
   const [myPosts, setMyPosts] = useState([]);
   const [likedPosts, setLikedPosts] = useState([]);
   const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
+  
 
   useEffect(() => {
     
@@ -36,6 +37,7 @@ const MyProfile = () => {
       const data = await response.json();
       setBookmarkedPosts(data);
     };
+    
 
     if (session?.user?.id) {
       fetchPosts();
@@ -80,15 +82,13 @@ const MyProfile = () => {
       {/* Pass the current user's ID to UserBio */}
       <UserBio userId={session?.user} />
 
-
       <h1 className='head_text text-left'>
         <span className='blue_gradient'>My Profile</span>
       </h1>
       <p className='desc text-left'>Welcome to your personalized profile page. Share your exceptional prompts and inspire others with the power of your imagination</p>
 
+
       <Profile
-        name='My'
-        desc='Welcome to your personalized profile page. Share your exceptional prompts and inspire others with the power of your imagination'
         data={myPosts}
         likes={likedPosts}
         bookmarks={bookmarkedPosts}
