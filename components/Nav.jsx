@@ -26,6 +26,10 @@ const Nav = () => {
     return;
   }
 
+  const handleHomeRedirect = () => {
+    router.push('/');
+  };
+
   return (
     <nav className='flex-between w-full mb-16 pt-3'>
       <Link href='/' className='flex gap-2 flex-center'>
@@ -47,9 +51,20 @@ const Nav = () => {
               Create Post
             </Link>
 
-            <button type='button' onClick={signOut} className='outline_btn'>
+            {/* <button type='button' onClick={signOut} className='outline_btn'>
+              Sign Out
+            </button> */}
+            <button
+              type="button"
+              onClick={() => {
+                signOut();
+                handleHomeRedirect();
+              }}
+              className="outline_btn"
+            >
               Sign Out
             </button>
+
 
             <Link href='/profile'>
               <Image
@@ -122,6 +137,7 @@ const Nav = () => {
                   onClick={() => {
                     setToggleDropdown(false);
                     signOut();
+                    handleHomeRedirect();
                   }}
                   className='mt-5 w-full black_btn'
                 >

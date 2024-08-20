@@ -87,7 +87,7 @@ const UserBio = ({ userId }) => {
       </div>
       
       {/* Display the followers and following counts */}
-      <Follows userId={userId} userDetails={userDetails} />
+      <Follows userId={userId} userDetails={userDetails} loggedInUserId={session?.user.id} />
     </div>
   );
 };

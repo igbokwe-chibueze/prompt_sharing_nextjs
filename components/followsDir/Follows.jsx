@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { useRouter } from "next/navigation";
 import qs from 'query-string'; // Import query-string to help with query string creation
 
-const Follows = ({ userId, userDetails }) => {
+const Follows = ({ userId, userDetails, loggedInUserId }) => {
     const router = useRouter();
 
     const [followersCount, setFollowersCount] = useState(0);
     const [followingCount, setFollowingCount] = useState(0);
+    const [mutualCount, setMutualCount] = useState(0);
 
     useEffect(() => {
         if (!userId || !userId.id) {
@@ -26,8 +27,15 @@ const Follows = ({ userId, userDetails }) => {
             setFollowingCount(data.length);
         };
 
+        const fetchMutualCount = async () => {
+            const response = await fetch(`/api/users/${userId.id}/mutuals?loggedInUserId=${loggedInUserId}`);
+            const data = await response.json();
+            setMutualCount(data.length);
+        };
+
         fetchFollowersCount();
         fetchFollowingCount();
+        fetchMutualCount();
       
     }, [userId]);
 
@@ -41,6 +49,12 @@ const Follows = ({ userId, userDetails }) => {
         router.push(`/profile/${userId.id}/following?${queryString}`);
     };
 
+    const handleNavigateToMutual = () => {
+        const queryString = qs.stringify({ name: userDetails.userName, image: userDetails.userImage });
+        router.push(`/profile/${userId.id}/mutuals?loggedInUserId=${loggedInUserId}&${queryString}`);
+    };
+    
+
     return (
         <>
             <div className="flex gap-4 mt-4">
@@ -49,6 +63,9 @@ const Follows = ({ userId, userDetails }) => {
                 </button>
                 <button onClick={handleNavigateToFollowing}>
                     Following: {followingCount}
+                </button>
+                <button onClick={handleNavigateToMutual}>
+                    Mutual: {mutualCount}
                 </button>
             </div>
         </>
