@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { signIn, signOut, useSession, getProviders } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { UserAddIcon } from "@constants/icons";
 
 const Nav = () => {
   const { data: session } = useSession();
@@ -65,6 +66,11 @@ const Nav = () => {
               Sign Out
             </button>
 
+            <Link href="/connect-users"
+              className='black_btn'
+            >
+              <UserAddIcon/>
+            </Link>
 
             <Link href='/profile'>
               <Image
@@ -132,6 +138,13 @@ const Nav = () => {
                 >
                   Create Prompt
                 </Link>
+
+                <Link href="/connect-users"
+                  className='black_btn'
+                >
+                  <UserAddIcon/>
+                </Link>
+
                 <button
                   type='button'
                   onClick={() => {
