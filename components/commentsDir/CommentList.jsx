@@ -5,7 +5,6 @@ import { useSession } from 'next-auth/react';
 
 const CommentList = ({ postId }) => {
     const { data: session } = useSession();
-
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
 
@@ -14,7 +13,7 @@ const CommentList = ({ postId }) => {
             try {
                 const response = await fetch(`/api/comments/${postId}`);
                 const data = await response.json();
-                setComments(data);
+                setComments(data); // Set the comments with the fully populated data
             } catch (error) {
                 console.error('Failed to fetch comments:', error);
             }
@@ -32,7 +31,7 @@ const CommentList = ({ postId }) => {
 
             if (res.ok) {
                 const createdComment = await res.json();
-                setComments([createdComment, ...comments]);
+                setComments([createdComment, ...comments]); // Prepend the new comment to the existing list
                 setNewComment('');
             }
         } catch (error) {
@@ -50,18 +49,32 @@ const CommentList = ({ postId }) => {
 
             if (res.ok) {
                 const createdReply = await res.json();
-                setComments(
-                    comments.map((comment) =>
-                        comment._id === parentCommentId
-                            ? { ...comment, replies: [...(comment.replies || []), createdReply] }
-                            : comment
-                    )
-                );
+                setComments((prevComments) => {
+                    const addReplyToComment = (comment) => {
+                        if (comment._id === parentCommentId) {
+                            return {
+                                ...comment,
+                                replies: [...(comment.replies || []), createdReply],
+                            };
+                        }
+                        if (comment.replies) {
+                            return {
+                                ...comment,
+                                replies: comment.replies.map(addReplyToComment),
+                            };
+                        }
+                        return comment;
+                    };
+                    return prevComments.map(addReplyToComment);
+                });
             }
         } catch (error) {
             console.error('Failed to post reply:', error);
         }
     };
+
+    // Destructure user information from session
+    const user = session?.user;
 
     return (
         <div className="comment-list">
@@ -73,7 +86,12 @@ const CommentList = ({ postId }) => {
             <button onClick={handleNewComment}>Submit</button>
 
             {comments.map((comment) => (
-                <Comment key={comment._id} comment={comment} onReply={handleReply} />
+                <Comment 
+                    key={comment._id} 
+                    comment={comment} 
+                    onReply={handleReply} 
+                    user={user} // Pass user info to Comment component
+                />
             ))}
         </div>
     );
