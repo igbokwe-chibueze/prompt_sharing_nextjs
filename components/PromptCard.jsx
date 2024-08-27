@@ -11,6 +11,7 @@ import Sharing from "./sharing/Sharing";
 import Reposting from "./Reposting";
 import PostActivity from "./PostActivity";
 import { useState } from "react";
+import CommentList from "./commentsDir/CommentList";
 
 /**
  * PromptCard Component
@@ -193,6 +194,8 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
           </div>
         )}
       </div>
+
+      <CommentList postId={post._id} />
 
       {session?.user.id === post.creator._id && pathName !== "/" && (
         <div className="mt-5 flex-center gap-4 border-t border-gray-100 pt-3">

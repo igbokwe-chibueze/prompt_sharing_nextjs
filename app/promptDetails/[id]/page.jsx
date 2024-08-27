@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
-import { useSession } from "next-auth/react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import PromptCard from "@components/PromptCard";
 
 /**
@@ -13,18 +11,7 @@ import PromptCard from "@components/PromptCard";
 const PromptDetails = ({ params }) => {
   const [prompt, setPrompt] = useState(null); // State to store prompt data
   const [loading, setLoading] = useState(true); // State to manage loading state
-  const { data: session } = useSession(); // Access session data for authentication
-  const pathName = usePathname(); // Get the current route path
   const router = useRouter(); // Next.js router for navigation
-
-  // Handles profile click - navigates to user's profile
-  const handleProfileClick = () => {
-    if (prompt.creator._id === session?.user.id) {
-      router.push("/profile"); // Navigate to logged-in user's profile
-    } else {
-      router.push(`/profile/${prompt.creator._id}?name=${prompt.creator.username}`); // Navigate to other user's profile
-    }
-  };
 
   // Fetch prompt details on component mount
   useEffect(() => {
