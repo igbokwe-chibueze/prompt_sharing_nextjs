@@ -8,6 +8,11 @@ const CommentList = ({ postId }) => {
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
 
+    const [userDetails, setUserDetails] = useState({ userName: "", userImage: "" });
+
+    // Destructure user information from session
+    const user = session?.user;
+
     useEffect(() => {
         const fetchComments = async () => {
             try {
@@ -18,8 +23,30 @@ const CommentList = ({ postId }) => {
                 console.error('Failed to fetch comments:', error);
             }
         };
+
+        // Fetch user details from the API
+        const fetchUserDetails = async () => {
+            try {
+                const response = await fetch(`/api/users/${user.id}/user-data`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+    
+            // Set user details and format the account creation date to long format
+            setUserDetails({ 
+                userName: data.username || "Unknown User", 
+                userImage: data.image || "/default-profile.png" 
+            });
+            } catch (error) {
+                console.error("Error fetching user details:", error);
+            }
+        };
+  
+        fetchUserDetails();
         fetchComments();
-    }, [postId]);
+    }, [postId, user]);
+
 
     const handleNewComment = async () => {
         try {
@@ -73,9 +100,6 @@ const CommentList = ({ postId }) => {
         }
     };
 
-    // Destructure user information from session
-    const user = session?.user;
-
     return (
         <div className="comment-list">
             <textarea
@@ -91,6 +115,7 @@ const CommentList = ({ postId }) => {
                     comment={comment} 
                     onReply={handleReply} 
                     user={user} // Pass user info to Comment component
+                    userDetails={userDetails} // Pass user info to Comment component
                 />
             ))}
         </div>
