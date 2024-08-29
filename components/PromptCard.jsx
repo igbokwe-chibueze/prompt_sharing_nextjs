@@ -195,7 +195,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
         )}
       </div>
 
-      <CommentList postId={post._id} />
+      <CommentList post={post} />
 
       {session?.user.id === post.creator._id && pathName !== "/" && (
         <div className="mt-5 flex-center gap-4 border-t border-gray-100 pt-3">

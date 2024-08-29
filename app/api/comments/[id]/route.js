@@ -31,35 +31,39 @@ const populateReplies = async (commentId) => {
 // GET request handler for fetching comments and their nested replies
 export const GET = async (request, { params }) => {
     try {
-        // Establish a connection to the database
         await connectToDB();
 
-        const postId = params.id; // Extract the postId from the route parameters
+        const postId = params.id;
+        const url = new URL(request.url);
+        const countOnly = url.searchParams.get('count');
 
-        // Fetch all root-level comments (i.e., comments with no parent) for the specified post
-        const rootComments = await Comment.find({ postId, parentCommentId: null })
-            .sort({ createdAt: -1 }) // Sort root comments by creation date in descending order
-            .populate('userId', 'username image'); // Populate the 'userId' field with the username and image of the user
+        // If the request URL includes ?count=true, the API will return only the total count of comments and replies.
+        // If ?count=true is not present, the API will return the full comment data with nested replies.
 
-        // Initialize an array to hold the fully populated comments
-        const populatedComments = [];
+        if (countOnly) {
+            // Return the total count of comments and replies
+            const totalCommentsAndReplies = await Comment.countDocuments({ postId });
+            return new Response(JSON.stringify({ total: totalCommentsAndReplies }), { status: 200 });
+        } else {
+            // Return the full comments with replies
+            const rootComments = await Comment.find({ postId, parentCommentId: null })
+                .sort({ createdAt: -1 })
+                .populate('userId', 'username image');
 
-        // Iterate over each root comment to populate its replies
-        for (let comment of rootComments) {
-            const populatedComment = comment.toObject(); // Convert the Mongoose document to a plain JavaScript object
+            const populatedComments = [];
 
-            // Recursively populate replies and assign them to the 'replies' field of the root comment
-            populatedComment.replies = await populateReplies(populatedComment._id); 
+            for (let comment of rootComments) {
+                const populatedComment = comment.toObject();
+                populatedComment.replies = await populateReplies(populatedComment._id);
+                populatedComments.push(populatedComment);
+            }
 
-            // Push the fully populated root comment object to the 'populatedComments' array
-            populatedComments.push(populatedComment);
+            return new Response(JSON.stringify(populatedComments), { status: 200 });
         }
 
-        // Return the populated comments array as a JSON response with a status of 200 (OK)
-        return new Response(JSON.stringify(populatedComments), { status: 200 });
-
     } catch (error) {
-        console.error('Error fetching comments:', error); // Log any errors that occur during the process
-        return new Response("Error fetching comments", { status: 500 }); // Return an error response with a status of 500 (Internal Server Error)
+        console.error('Error handling request:', error);
+        return new Response("Error handling request", { status: 500 });
     }
 };
+
