@@ -1,128 +1,139 @@
-// components/CommentList.js
 import { useState, useEffect } from 'react';
 import Comment from './Comment';
 import { useSession } from 'next-auth/react';
-import { ChatBubbleIcon } from '@constants/icons';
+import { ChatBubbleIcon, LoadingIcon } from '@constants/icons';
 import { usePathname, useRouter } from 'next/navigation';
 
 const CommentList = ({ post }) => {
+    // Session management
     const { data: session } = useSession();
-    const pathName = usePathname(); // Get the current route path
-    const router = useRouter(); // Next.js router for navigation
+    const user = session?.user; // Destructure user information from session
 
+    // Routing and path management
+    const pathName = usePathname();
+    const router = useRouter();
+
+    // State management for comments, new comment input, and user details
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
-    const [countComments, setCountComments] = useState([]);
-
     const [userDetails, setUserDetails] = useState({ userName: "", userImage: "" });
 
-    // Destructure user information from session
-    const user = session?.user;
+    // State management for comments count and limits
+    const [totalCommentsAndRepliesCount, setTotalCommentsAndRepliesCount] = useState(0);
+    const [totalRootCommentsCount, setTotalRootCommentsCount] = useState(0);
+    const [commentsLimit, setCommentsLimit] = useState(2); // Initial limit for comments
+    const [repliesLimit] = useState(1); // Fixed limit for replies
+    const [isLoadingMoreComments, setIsLoadingMoreComments] = useState(false); // Track loading state for "See More" button
 
-    const postId = post._id
-    const postCreator = post.creator._id
+    // Extract post details for easier reference
+    const postId = post._id;
+    const postCreator = post.creator._id;
 
     useEffect(() => {
-
+        // Fetches comments and their count from the server
         const fetchCommentsAndCount = async () => {
             try {
-                // Fetch comments with replies
-                const responseComments = await fetch(`/api/comments/${postId}`);
+                // Fetch comments with replies based on the current limits
+                const responseComments = await fetch(`/api/comments/${postId}?commentsLimit=${commentsLimit}&repliesLimit=${repliesLimit}`);
                 const commentsData = await responseComments.json();
-                setComments(commentsData); // Set the comments with the fully populated data
-        
+                setComments(commentsData); // Update state with fetched comments
+
                 // Fetch the total count of comments and replies
                 const responseCount = await fetch(`/api/comments/${postId}?count=true`);
                 const countData = await responseCount.json();
-                setCountComments(countData.total);
-        
+                setTotalCommentsAndRepliesCount(countData.totalCount); // Total count including replies
+                setTotalRootCommentsCount(countData.commentsCount); // Count of root comments (not replies)
             } catch (error) {
                 console.error('Failed to fetch comments or count:', error);
+            } finally {
+                setIsLoadingMoreComments(false); // Reset loading state after fetching
             }
         };
-        
 
-        // Fetch user details from the API
+        // Fetch user details such as username and profile image
         const fetchUserDetails = async () => {
             try {
                 const response = await fetch(`/api/users/${user.id}/user-data`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-    
-            // Set user details and format the account creation date to long format
-            setUserDetails({ 
-                userName: data.username || "Unknown User", 
-                userImage: data.image || "/default-profile.png" 
-            });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                setUserDetails({
+                    userName: data.username || "Unknown User",
+                    userImage: data.image || "/default-profile.png"
+                });
             } catch (error) {
                 console.error("Error fetching user details:", error);
             }
         };
-  
-        fetchUserDetails();
-        fetchCommentsAndCount();
-    }, [postId, user]);
 
-    // Handles prompt click - shows login popup if not logged in
+        if (user) fetchUserDetails(); // Only fetch user details if user is logged in
+        fetchCommentsAndCount(); // Fetch comments and their count whenever dependencies change
+    }, [postId, user, commentsLimit]);
+
+    // Handle navigation when the prompt is clicked
     const handlePromptClick = async () => {
         if (!session) {
-            // Redirect to login page with message
-            const message = "Sorry need to be logged in to view prompt details. Please log in to continue.";
+            // If user is not logged in, redirect to login page with a message
+            const message = "Sorry, you need to be logged in to view prompt details. Please log in to continue.";
             router.push(`/login?message=${message}`);
             return;
         }
 
-            // Determine if the logged-in user is the creator of the prompt
-            if ( postCreator !== user.id) {
-                // Increment the prompt click count if not the creator
-                try {
-                    await fetch(`/api/prompt/${post._id}/incrementPromptClick`, {
+        // If the user is not the creator of the prompt, increment the prompt click count
+        if (postCreator !== user.id) {
+            try {
+                await fetch(`/api/prompt/${postId}/incrementPromptClick`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    });
-                } catch (error) {
-                    console.log("Error:", error);
-                }
+                });
+            } catch (error) {
+                console.log("Error incrementing prompt click:", error);
             }
+        }
 
         // Navigate to the prompt details page
         router.push(`/promptDetails/${postId}`);
     };
 
-
+    // Handle submission of a new comment
     const handleNewComment = async () => {
+        if (!newComment.trim()) return; // Prevent empty comments from being submitted
+
         try {
             const res = await fetch('/api/comments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ postId, userId: session?.user.id, content: newComment }),
+                body: JSON.stringify({ postId, userId: user.id, content: newComment }),
             });
 
             if (res.ok) {
                 const createdComment = await res.json();
-                setComments([createdComment, ...comments]); // Prepend the new comment to the existing list
-                setNewComment('');
+                setComments([createdComment, ...comments]); // Add the new comment at the top of the list
+                setNewComment(''); // Clear the comment input field
             }
         } catch (error) {
             console.error('Failed to post comment:', error);
         }
     };
 
+    // Handle submission of a reply to a specific comment
     const handleReply = async (parentCommentId, replyContent) => {
+        if (!replyContent.trim()) return; // Prevent empty replies from being submitted
+
         try {
             const res = await fetch('/api/comments', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ postId, userId: session?.user.id, content: replyContent, parentCommentId }),
+                body: JSON.stringify({ postId, userId: user.id, content: replyContent, parentCommentId }),
             });
 
             if (res.ok) {
                 const createdReply = await res.json();
                 setComments((prevComments) => {
+                    // Recursively find the parent comment and add the reply to it
                     const addReplyToComment = (comment) => {
                         if (comment._id === parentCommentId) {
                             return {
@@ -146,6 +157,12 @@ const CommentList = ({ post }) => {
         }
     };
 
+    // Handle the "See More Comments" button click
+    const handleSeeMoreComments = async () => {
+        setIsLoadingMoreComments(true); // Set loading state to true
+        setCommentsLimit((prevLimit) => prevLimit + 2); // Increase the comments limit to fetch more comments
+    };
+
     return (
         <div className="comment-list">
             <div 
@@ -153,7 +170,7 @@ const CommentList = ({ post }) => {
                 onClick={pathName !== `/promptDetails/${postId}` ? handlePromptClick : undefined}
             >
                 <ChatBubbleIcon className={`text-gray-800 ${pathName !== `/promptDetails/${postId}` ? "hover:fill-gray-800" : ""}`}/>
-                <p>{countComments}</p>
+                <p>{totalCommentsAndRepliesCount}</p>
             </div>
 
             {pathName === `/promptDetails/${postId}` && (
@@ -171,12 +188,27 @@ const CommentList = ({ post }) => {
                             comment={comment} 
                             onReply={handleReply} 
                             user={user} // Pass user info to Comment component
-                            userDetails={userDetails} // Pass user info to Comment component
+                            userDetails={userDetails} // Pass user details to Comment component
                         />
                     ))}
+
+                    {comments.length < totalRootCommentsCount && (
+                        <button 
+                            onClick={handleSeeMoreComments} disabled={isLoadingMoreComments}
+                            className={`group mt-2 px-4 py-2 rounded-full 
+                                ${isLoadingMoreComments ? "bg-gray-400 cursor-not-allowed" : "outline_btn"}`}
+                        >
+                            {isLoadingMoreComments ? 
+                                <span className="flex items-center space-x-2">
+                                    <LoadingIcon className={"animate-spin fill-white"} />
+                                    <p>Loading...</p>
+                                </span> : 
+                                `See ${totalRootCommentsCount - comments.length} More Comments`
+                            }
+                        </button>
+                    )}
                 </div>
             )}
-            
         </div>
     );
 };
