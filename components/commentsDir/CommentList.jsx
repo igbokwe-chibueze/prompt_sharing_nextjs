@@ -200,7 +200,7 @@ const CommentList = ({ post }) => {
                         >
                             {isLoadingMoreComments ? 
                                 <span className="flex items-center space-x-2">
-                                    <LoadingIcon className={"animate-spin fill-white"} />
+                                    <LoadingIcon className={"animate-spin fill-white w-4 h-4"} />
                                     <p>Loading...</p>
                                 </span> : 
                                 `See ${totalRootCommentsCount - comments.length} More Comments`
