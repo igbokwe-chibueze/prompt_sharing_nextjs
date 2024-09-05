@@ -12,6 +12,7 @@ import Reposting from "./Reposting";
 import PostActivity from "./PostActivity";
 import { useState } from "react";
 import CommentList from "./commentsDir/CommentList";
+import CommentBtn from "./commentsDir/CommentBtn";
 
 /**
  * PromptCard Component
@@ -175,7 +176,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
         <Liking post={post} session={session}/>
 
         {/* Comment Button */}
-        <CommentList post={post} />
+        <CommentBtn post={post}/>
         
         {/* Reposting */}
         <Reposting post={post} session={session}/>
@@ -219,6 +220,9 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
           </p>
         </div>
       )}
+
+      {/* Comment List */}
+      <CommentList post={post} />
     </div>
   );
 };

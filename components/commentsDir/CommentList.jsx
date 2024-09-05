@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Comment from './Comment';
 import { useSession } from 'next-auth/react';
-import { ChatBubbleIcon, LoadingIcon } from '@constants/icons';
+import { LoadingIcon } from '@constants/icons';
 import { usePathname, useRouter } from 'next/navigation';
 
 const CommentList = ({ post }) => {
@@ -19,7 +19,6 @@ const CommentList = ({ post }) => {
     const [userDetails, setUserDetails] = useState({ userName: "", userImage: "" });
 
     // State management for comments count and limits
-    const [totalCommentsAndRepliesCount, setTotalCommentsAndRepliesCount] = useState(0);
     const [totalRootCommentsCount, setTotalRootCommentsCount] = useState(0);
     const [commentsLimit, setCommentsLimit] = useState(2); // Initial limit for comments
     const [repliesLimit] = useState(1); // Fixed limit for replies
@@ -41,7 +40,6 @@ const CommentList = ({ post }) => {
                 // Fetch the total count of comments and replies
                 const responseCount = await fetch(`/api/comments/${postId}?count=true`);
                 const countData = await responseCount.json();
-                setTotalCommentsAndRepliesCount(countData.totalCount); // Total count including replies
                 setTotalRootCommentsCount(countData.commentsCount); // Count of root comments (not replies)
             } catch (error) {
                 console.error('Failed to fetch comments or count:', error);
@@ -70,33 +68,6 @@ const CommentList = ({ post }) => {
         if (user) fetchUserDetails(); // Only fetch user details if user is logged in
         fetchCommentsAndCount(); // Fetch comments and their count whenever dependencies change
     }, [postId, user, commentsLimit]);
-
-    // Handle navigation when the prompt is clicked
-    const handlePromptClick = async () => {
-        if (!session) {
-            // If user is not logged in, redirect to login page with a message
-            const message = "Sorry, you need to be logged in to view prompt details. Please log in to continue.";
-            router.push(`/login?message=${message}`);
-            return;
-        }
-
-        // If the user is not the creator of the prompt, increment the prompt click count
-        if (postCreator !== user.id) {
-            try {
-                await fetch(`/api/prompt/${postId}/incrementPromptClick`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-            } catch (error) {
-                console.log("Error incrementing prompt click:", error);
-            }
-        }
-
-        // Navigate to the prompt details page
-        router.push(`/promptDetails/${postId}`);
-    };
 
     // Handle submission of a new comment
     const handleNewComment = async () => {
@@ -165,14 +136,7 @@ const CommentList = ({ post }) => {
 
     return (
         <div className="comment-list">
-            <div 
-                className={`flex items-center ${pathName !== `/promptDetails/${postId}` ? "cursor-pointer" : ""}`}
-                onClick={pathName !== `/promptDetails/${postId}` ? handlePromptClick : undefined}
-            >
-                <ChatBubbleIcon className={`text-gray-800 ${pathName !== `/promptDetails/${postId}` ? "hover:fill-gray-800" : ""}`}/>
-                <p className="text-sm text-gray-700">{totalCommentsAndRepliesCount}</p>
-            </div>
-
+            {/* Show comments only in prompt details page */}
             {pathName === `/promptDetails/${postId}` && (
                 <div>
                     <div className="mt-2">
@@ -199,7 +163,8 @@ const CommentList = ({ post }) => {
                             userDetails={userDetails} // Pass user details to Comment component
                         />
                     ))}
-
+                    
+                    {/* See More Btn */}
                     {comments.length < totalRootCommentsCount && (
                         <button 
                             onClick={handleSeeMoreComments} disabled={isLoadingMoreComments}
