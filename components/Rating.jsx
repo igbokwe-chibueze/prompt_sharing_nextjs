@@ -71,7 +71,7 @@ const Rating = ({ post, session }) => {
         <button
           onClick={() => setIsRateModalOpen(true)}
           disabled={post.creator._id === session?.user.id} // Disable if user is the creator
-          className={`mt-4 flex items-center space-x-2 font-inter text-sm text-blue-500 ${post.creator._id === session?.user.id ? "": "cursor-pointer"}`}
+          className={`flex items-center space-x-2 font-inter text-sm text-blue-500 ${post.creator._id === session?.user.id ? "": "cursor-pointer"}`}
         >
           <div className="flex space-x-1">
             {[1, 2, 3, 4, 5].map(star => {
@@ -93,7 +93,7 @@ const Rating = ({ post, session }) => {
         </button>
 
         {isRateModalOpen && (
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 px-10 py-20">
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 p-2">
             <div className="bg-white p-5 rounded shadow-lg relative w-full h-full">
               <button
                 className="absolute top-2 right-2 text-gray-600 hover:text-gray-900"

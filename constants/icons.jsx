@@ -31,7 +31,7 @@ export const HeartIcon = ({ className, ...rest }) => (
       fill="none" 
       xmlns="http://www.w3.org/2000/svg"
       {...rest}
-      className={`w-6 h-6 ${className}`}
+      className={`w-5 h-5 ${className}`}
     >
         <path 
             stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
@@ -46,7 +46,7 @@ export const HeartFilledIcon = ({ className, ...rest }) => (
     fill="currentColor" 
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
       <path 
           d="m12.75 20.66 6.184-7.098c2.677-2.884 2.559-6.506.754-8.705-.898-1.095-2.206-1.816-3.72-1.855-1.293-.034-2.652.43-3.963 
@@ -64,7 +64,7 @@ export const BookmarkFilledIcon = ({ className, ...rest }) => (
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <path 
       d="M7.833 2c-.507 0-.98.216-1.318.576A1.92 1.92 0 0 0 6 3.89V21a1 1 0 0 0 1.625.78L12 18.28l4.375 3.5A1 1 0 0 0 18 
@@ -79,7 +79,7 @@ export const BookmarkIcon = ({ className, ...rest }) => (
     fill="none" 
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <path 
       stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -95,7 +95,7 @@ export const StarFilledIcon = ({ className, ...rest }) => (
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <path 
       d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 
@@ -111,7 +111,7 @@ export const StarIcon = ({ className, ...rest }) => (
     fill="none" 
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <path 
       stroke="currentColor" stroke-width="2" 
@@ -128,7 +128,7 @@ export const StarHalfFilledIcon = ({ className, ...rest }) => (
     fill="currentColor" 
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <path 
       fill-rule="evenodd" 
@@ -147,7 +147,7 @@ export const CloseFilledIcon = ({ className, ...rest }) => (
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <path 
       fill-rule="evenodd" 
@@ -165,7 +165,7 @@ export const ShareIcon = ({ className, ...rest }) => (
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <path d="M17.5 3a3.5 3.5 0 0 0-3.456 4.06L8.143 9.704a3.5 3.5 0 1 0-.01 4.6l5.91 2.65a3.5 3.5 0 1 
       0 .863-1.805l-5.94-2.662a3.53 3.53 0 0 0 .002-.961l5.948-2.667A3.5 3.5 0 1 0 17.5 3Z"
@@ -180,7 +180,7 @@ export const CopyIcon = ({ className, ...rest }) => (
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <path 
       fillRule="evenodd" 
@@ -203,7 +203,7 @@ export const XIcon = ({ className, ...rest }) => (
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <path d="M13.795 10.533 20.68 2h-3.073l-5.255 6.517L7.69 2H1l7.806 10.91L1.47 22h3.074l5.705-7.07L15.31 22H22l-8.205-11.467Zm-2.38 
       2.95L9.97 11.464 4.36 3.627h2.31l4.528 6.317 1.443 2.02 6.018 8.409h-2.31l-4.934-6.89Z"
@@ -218,7 +218,7 @@ export const FacebookIcon = ({ className, ...rest }) => (
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <path 
       fillRule="evenodd" 
@@ -235,7 +235,7 @@ export const WhatsappIcon = ({ className, ...rest }) => (
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <path 
       fill="currentColor" fill-rule="evenodd" 
@@ -261,7 +261,7 @@ export const LinkedInIcon = ({ className, ...rest }) => (
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <path fill-rule="evenodd" 
       d="M12.51 8.796v1.697a3.738 3.738 0 0 1 3.288-1.684c3.455 0 4.202 2.16 4.202 4.97V19.5h-3.2v-5.072c0-1.21-.244-2.766-2.128-2.766-1.827 
@@ -280,7 +280,7 @@ export const EnvelopeIcon = ({ className, ...rest }) => (
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <path 
       d="M2.038 5.61A2.01 2.01 0 0 0 2 6v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6c0-.12-.01-.238-.03-.352l-.866.65-7.89 6.032a2 2 0 0 
@@ -297,7 +297,7 @@ export const RepeatIcon = ({ className, ...rest }) => (
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <path 
       stroke="currentColor" stroke-linecap="round" 
@@ -314,7 +314,7 @@ export const CenterIcon = ({ className, ...rest }) => (
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 6h8M6 10h12M8 14h8M6 18h12"/>
   </svg>
@@ -327,7 +327,7 @@ export const LoadingIcon = ({ className, ...rest }) => (
     aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <g fill="current" fill-rule="evenodd" clip-rule="evenodd">
       <path d="M8 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8" opacity=".2"/>
@@ -342,7 +342,7 @@ export const UserAddIcon = ({ className, ...rest }) => (
     fill="none" 
     xmlns="http://www.w3.org/2000/svg"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
       d="M16 12h4m-2 2v-4M4 18v-1a3 3 0 0 1 3-3h4a3 3 0 0 1 3 3v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Zm8-10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
@@ -357,7 +357,7 @@ export const ChatBubbleIcon = ({ className, ...rest }) => (
     xmlns="http://www.w3.org/2000/svg"
     stroke-width="1.5" stroke="currentColor"
     {...rest}
-    className={`w-6 h-6 ${className}`}
+    className={`w-5 h-5 ${className}`}
   >
     <path stroke-linecap="round" stroke-linejoin="round" 
       d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 

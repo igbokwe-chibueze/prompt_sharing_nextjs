@@ -55,7 +55,7 @@ const Liking = ({ post, session }) => {
     <>
         <div className="like_btn" onClick={handleLike} disabled={isSubmitting}>
             <HeartIcon className={`text-gray-800 ${liked ? "fill-gray-800" : "hover:fill-gray-800"}`}/>
-            <p>{likeCount}</p>
+            <p className="text-sm text-gray-700">{likeCount}</p>
         </div>
     </>
   )

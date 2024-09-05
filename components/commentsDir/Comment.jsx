@@ -57,7 +57,7 @@ const Comment = ({ comment, onReply, user, userDetails }) => {
                         onChange={(e) => setReplyContent(e.target.value)}
                         placeholder="Write a reply..."
                     />
-                    <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md" onClick={handleReply}>
+                    <button className="mt-2 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded-md" onClick={handleReply}>
                         Submit
                     </button>
                 </div>

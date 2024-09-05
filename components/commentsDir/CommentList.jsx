@@ -170,17 +170,25 @@ const CommentList = ({ post }) => {
                 onClick={pathName !== `/promptDetails/${postId}` ? handlePromptClick : undefined}
             >
                 <ChatBubbleIcon className={`text-gray-800 ${pathName !== `/promptDetails/${postId}` ? "hover:fill-gray-800" : ""}`}/>
-                <p>{totalCommentsAndRepliesCount}</p>
+                <p className="text-sm text-gray-700">{totalCommentsAndRepliesCount}</p>
             </div>
 
             {pathName === `/promptDetails/${postId}` && (
                 <div>
-                    <textarea
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        placeholder="Write a comment..."
-                    />
-                    <button onClick={handleNewComment}>Submit</button>
+                    <div className="mt-2">
+                        <textarea
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            placeholder="Write a comment..."
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                        />
+                        <button 
+                            onClick={handleNewComment}
+                            className="mt-2 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded-md"
+                        >
+                            Submit
+                        </button>
+                    </div>
     
                     {comments.map((comment) => (
                         <Comment 

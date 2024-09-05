@@ -17,12 +17,12 @@ const Sharing = ({ post, session }) => {
         <button
           onClick={() => setIsShareModalOpen(true)}
           disabled={post.creator._id === session?.user.id} // Disable if user is the creator
-          className={`mt-4 w-4 h-4 text-gray-600 hover:text-gray-900 ${post.creator._id === session?.user.id ? "": "cursor-pointer"}`}
+          className={`w-4 h-4 text-gray-600 hover:text-gray-900 ${post.creator._id === session?.user.id ? "": "cursor-pointer"}`}
         >
             <ShareIcon/>
         </button>
         {isShareModalOpen && (
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 px-10 py-20">
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 p-2">
                 <div className="bg-white p-5 rounded shadow-lg relative w-full h-full">
                     <button
                         className="absolute top-2 right-2 text-gray-600 hover:text-gray-900"

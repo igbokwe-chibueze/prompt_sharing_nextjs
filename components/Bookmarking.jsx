@@ -53,9 +53,9 @@ const Bookmarking = ({ post, session }) => {
 
   return (
     <>
-        <div className="mt-4 bookmark_btn" onClick={handleBookmark} disabled={isSubmitting}>
+        <div className="bookmark_btn" onClick={handleBookmark} disabled={isSubmitting}>
             <BookmarkIcon className={`text-gray-800 ${isBookmarked ? "fill-gray-800" : "hover:fill-gray-800"}`}/>
-            <p>{bookmarkCount}</p>
+            <p className="text-sm text-gray-700">{bookmarkCount}</p>
         </div>
     </>
   )

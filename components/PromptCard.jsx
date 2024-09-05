@@ -100,7 +100,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
   const isUpdated = post.updatedAt && post.updatedAt !== post.createdAt;
 
   return (
-    <div className="prompt_card">
+    <div className="prompt_card space-y-4">
       <div className="flex justify-between items-start gap-5">
         {/* User information and profile navigation */}
         <div
@@ -136,17 +136,20 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
         {post.prompt}
       </p>
 
-      {/* Created at information */}
-      <p className="font-inter text-sm text-gray-500">
-        Created At: {new Date(post.createdAt).toLocaleDateString()}
-      </p>
-
-      {/* Conditionally render updated at information */}
-      {isUpdated && (
-        <p className="mt-2 font-inter text-sm text-gray-500">
-          Updated At: {new Date(post.updatedAt).toLocaleDateString()}
+      {/* Date and time */}
+      <div className=" flex items-center space-x-2 font-inter text-xs text-gray-500">
+        {/* Created at information */}
+        <p>
+          Created At: {new Date(post.createdAt).toLocaleDateString()}
         </p>
-      )}
+
+        {/* Conditionally render updated at information */}
+        {isUpdated && (
+          <p>
+            Updated At: {new Date(post.updatedAt).toLocaleDateString()}
+          </p>
+        )}
+      </div>    
 
       {/* Tag with click functionality */}
       <div className="flex justify-start items-center flex-wrap gap-2 mt-2">
@@ -167,33 +170,38 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
         ))}
       </div>
 
-      {/* Like Button */}
-      <Liking post={post} session={session}/>
+      <div className="flex justify-between items-center">
+        {/* Like Button */}
+        <Liking post={post} session={session}/>
 
-      {/* Bookmark Button */}
-      <Bookmarking post={post} session={session}/>
+        {/* Comment Button */}
+        <CommentList post={post} />
+        
+        {/* Reposting */}
+        <Reposting post={post} session={session}/>
+
+        {/* Post Activity */}
+        <div className="flex justify-start items-center">
+          
+          <PostActivity post={post} session={session} setEngagements={setTotalEngagements}/>
+
+          {/* Display Total Engagements */}
+          {totalEngagements > 0 && (
+            <div className="font-inter text-sm text-gray-700">
+              {totalEngagements}
+            </div>
+          )}
+        </div>
+
+        {/* Bookmark Button */}
+        <Bookmarking post={post} session={session}/>
+        
+        {/* Sharing */}
+        <Sharing post={post}/>
+      </div>
 
       {/* Rating */}
       <Rating post={post} session={session}/>
-      
-      {/* Sharing */}
-      <Sharing post={post}/>
-      
-      {/* Reposting */}
-      <Reposting post={post} session={session}/>
-
-      {/* Post Activity */}
-      <div className="mt-4 flex justify-start items-center">
-        
-        <PostActivity post={post} session={session} setEngagements={setTotalEngagements}/>
-
-        {/* Display Total Engagements */}
-        {totalEngagements > 0 && (
-          <div className="font-inter text-sm text-gray-600">
-            {totalEngagements}
-          </div>
-        )}
-      </div>
 
       {session?.user.id === post.creator._id && pathName !== "/" && (
         <div className="mt-5 flex-center gap-4 border-t border-gray-100 pt-3">
@@ -211,8 +219,6 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
           </p>
         </div>
       )}
-
-      <CommentList post={post} />
     </div>
   );
 };

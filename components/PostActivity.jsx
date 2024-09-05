@@ -35,7 +35,7 @@ const PostActivity = ({ post, session, setEngagements }) => {
                 </button>
 
                 {isModalOpen && (
-                    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 px-10 py-20">
+                    <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 p-2">
                         <div className="bg-white p-5 rounded shadow-lg relative w-full h-full">
                             <button
                                 className="absolute top-2 right-2 text-gray-600 hover:text-gray-900"

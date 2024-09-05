@@ -174,24 +174,10 @@
   @apply flex justify-between items-center;
 }
 
-/* Like btn */
 .like_btn {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
+  @apply flex justify-start items-center cursor-pointer
 }
 
-.like_btn p {
-  margin-left: 5px;
-}
-
-/* Like btn */
 .bookmark_btn {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-}
-
-.bookmark_btn p {
-  margin-left: 5px;
+  @apply flex justify-start items-center cursor-pointer
 }
