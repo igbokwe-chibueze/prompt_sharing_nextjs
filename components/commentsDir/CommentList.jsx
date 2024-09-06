@@ -143,18 +143,31 @@ const CommentList = ({ post }) => {
                 content: newContent
             }),
           });
-    
+
           if (response.ok) {
             // Update the comment in the local state
-            setComments(prevComments => 
-                prevComments.map(comment => 
-                    comment._id === commentId // If the current comment's ID matches the comment that was edited...
-                    // Create a new object with all the existing comment properties and Update the 'content' with the newly edited content.
-                    ? { ...comment, content: newContent, updatedAt: new Date() } 
-                    : comment // If it's not the edited comment, return it unchanged
-                )
-            );
+            setComments((prevComments) => {  // Update the comments state with a function that receives the previous state
+              const updateComment = (comment) => {  // Function to update a specific comment or its replies
+                // If the current comment's ID matches the ID of the comment that was edited...
+                if (comment._id === commentId) {
+                  // Return the updated comment with new content and an updated timestamp
+                  return { ...comment, content: newContent, updatedAt: new Date() };
+                }
+                // If the current comment has replies, recursively apply this function to the replies
+                if (comment.replies) {
+                  return {
+                    ...comment,  // Keep the rest of the comment properties unchanged
+                    replies: comment.replies.map(updateComment),  // Map over the replies to update the relevant reply
+                  };
+                }
+                // Return the comment unchanged if it doesn't match the ID and has no replies
+                return comment;
+              };
+              // Map over the previous comments, applying the update function to each one
+              return prevComments.map(updateComment);
+            });
           }
+          
         } catch (error) {
           console.log(error);
         }
