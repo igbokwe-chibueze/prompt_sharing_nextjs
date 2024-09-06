@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Comment from './Comment';
 import { useSession } from 'next-auth/react';
 import { LoadingIcon } from '@constants/icons';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 const CommentList = ({ post }) => {
     // Session management
@@ -11,7 +11,6 @@ const CommentList = ({ post }) => {
 
     // Routing and path management
     const pathName = usePathname();
-    const router = useRouter();
 
     // State management for comments, new comment input, and user details
     const [comments, setComments] = useState([]);
@@ -26,7 +25,6 @@ const CommentList = ({ post }) => {
 
     // Extract post details for easier reference
     const postId = post._id;
-    const postCreator = post.creator._id;
 
     useEffect(() => {
         // Fetches comments and their count from the server
@@ -134,6 +132,34 @@ const CommentList = ({ post }) => {
         setCommentsLimit((prevLimit) => prevLimit + 2); // Increase the comments limit to fetch more comments
     };
 
+    const handleEdit = async (commentId, newContent) => {
+    
+        if (!commentId) return alert("Missing commentId!");
+    
+        try {
+          const response = await fetch(`/api/comments/${commentId}`, {
+            method: "PATCH",
+            body: JSON.stringify({
+                content: newContent
+            }),
+          });
+    
+          if (response.ok) {
+            // Update the comment in the local state
+            setComments(prevComments => 
+                prevComments.map(comment => 
+                    comment._id === commentId // If the current comment's ID matches the comment that was edited...
+                    // Create a new object with all the existing comment properties and Update the 'content' with the newly edited content.
+                    ? { ...comment, content: newContent, updatedAt: new Date() } 
+                    : comment // If it's not the edited comment, return it unchanged
+                )
+            );
+          }
+        } catch (error) {
+          console.log(error);
+        }
+    };
+
     return (
         <div className="comment-list">
             {/* Show comments only in prompt details page */}
@@ -156,9 +182,10 @@ const CommentList = ({ post }) => {
     
                     {comments.map((comment) => (
                         <Comment 
-                            key={comment._id} 
-                            comment={comment} 
-                            onReply={handleReply} 
+                            key={comment._id}
+                            comment={comment}
+                            onReply={handleReply}
+                            onEdit={handleEdit}
                             user={user} // Pass user info to Comment component
                             userDetails={userDetails} // Pass user details to Comment component
                         />
