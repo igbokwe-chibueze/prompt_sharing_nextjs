@@ -28,7 +28,11 @@ const CommentSchema = new Schema({
     updatedAt: {
         type: Date,
         default: Date.now,
-    }
+    },
+    deletedAt: {
+        type: Date,
+        default: null, // null means the comment is not deleted
+    },
 });
 
 const Comment = models.Comment || model("Comment", CommentSchema);

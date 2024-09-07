@@ -30,7 +30,9 @@ export const GET = async (request, { params }) => {
         const limit = parseInt(url.searchParams.get('commentsLimit')) || 2;
 
         if (countOnly) {
-            const totalCommentsAndReplies = await Comment.countDocuments({ postId });
+            // Count documents with deletedAt being null or not set
+            const totalCommentsAndReplies = await Comment.countDocuments({ postId, $or: [{ deletedAt: { $exists: false } }, { deletedAt: null }] });
+
             const totalrootComments = await Comment.countDocuments({ postId, parentCommentId: null })
             return new Response(JSON.stringify({ totalCount: totalCommentsAndReplies, commentsCount:totalrootComments }), { status: 200 });
         } else {
@@ -82,12 +84,32 @@ export const PATCH = async (request, { params }) => {
 export const DELETE = async (request, { params }) => {
     try {
         await connectToDB();
-        
-        // Find the prompt by ID and remove it
-        await Comment.findByIdAndDelete(params.id);
 
-        return new Response("Comment deleted successfully", { status: 200 });
+        const commentId = params.id;
+
+        // Find the comment by ID
+        const comment = await Comment.findById(commentId);
+
+        if (!comment) {
+            return new Response("Comment not found", { status: 404 });
+        }
+
+        // Check if the comment has replies
+        const hasReplies = await Comment.countDocuments({ parentCommentId: commentId });   
+
+        if (hasReplies) {
+            // If the comment has replies, "soft delete" it by setting deletedAt, this  keep replies intact
+            comment.deletedAt = new Date();
+            comment.content = "This comment is no longer available";
+            await comment.save();
+        } else {
+            // If the comment has no replies, hard delete it
+            await Comment.findByIdAndDelete(commentId);
+        }
+
+        return new Response("Comment marked as deleted successfully", { status: 200 });
     } catch (error) {
-        return new Response("Error deleting comment", { status: 500 });
+        console.error('Error marking comment as deleted:', error);
+        return new Response("Error marking comment as deleted", { status: 500 });
     }
 };

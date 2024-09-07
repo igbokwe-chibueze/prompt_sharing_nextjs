@@ -54,63 +54,58 @@ const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
     // Check if the comment has been updated/edited
   const isUpdated = comment.updatedAt && comment.updatedAt !== comment.createdAt;
 
+  // Check if comment is marked as deleted
+  const isDeleted = !!comment.deletedAt;
+
     return (
         <div className="comment p-4 bg-gray-100 rounded-md my-2">
-            <div className="flex items-center mb-2 space-x-2 cursor-pointer" onClick={handleProfileClick}>
-                <Image
-                    src={comment.userId.image || userDetails?.userImage}
-                    alt={`${comment.userId.username || userDetails?.userName}'s profile picture`}
-                    width={40}
-                    height={40}
-                    className="rounded-full object-contain"
-                />
-                <p className="font-bold">{comment.userId.username || userDetails?.userName}</p>
-            </div>
-
-            {showEditBox ? (
-                <div className="mt-2">
-                    <textarea
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                        value={editContent}
-                        onChange={(e) => setEditContent(e.target.value)}
-                        placeholder="Edit your comment..."
-                    />
-                    <div className="mt-2 space-x-2">
-                        <button 
-                            className="px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded-md"
-                            onClick={handleEdit} // Save the edited content
-                        >
-                            Save
-                        </button>
-                        <button 
-                            className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-md"
-                            onClick={handleCancelEdit} // Cancel and reset the edit
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                </div>
+            {isDeleted ? (
+                <p className="italic text-gray-500">{comment.content}</p>
             ) : (
-                <p>{comment.content}</p>
+                    <>
+                        <div className="flex items-center mb-2 space-x-2 cursor-pointer" onClick={handleProfileClick}>
+                            <Image
+                                src={comment.userId.image || userDetails?.userImage}
+                                alt={`${comment.userId.username || userDetails?.userName}'s profile picture`}
+                                width={40}
+                                height={40}
+                                className="rounded-full object-contain"
+                            />
+                            <p className="font-bold">{comment.userId.username || userDetails?.userName}</p>
+                        </div>
+
+                        {showEditBox ? (
+                            <div className="mt-2">
+                                <textarea
+                                    className="w-full p-2 border border-gray-300 rounded-md"
+                                    value={editContent}
+                                    onChange={(e) => setEditContent(e.target.value)}
+                                    placeholder="Edit your comment..."
+                                />
+                                <div className="mt-2 space-x-2">
+                                    <button className="px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded-md" onClick={handleEdit}>
+                                        Save
+                                    </button>
+                                    <button className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-md" onClick={handleCancelEdit}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <p>{comment.content}</p>
+                        )}
+                    </>
             )}
 
+            {/* Only render date and actions if the comment is not deleted */}
+            {!isDeleted && (
+                <div className="mt-2 flex items-center space-x-2 font-inter text-xs text-gray-500">
+                    <p>Created At: {new Date(comment.createdAt).toLocaleDateString()}</p>
+                    {isUpdated && <p>Updated At: {new Date(comment.updatedAt).toLocaleDateString()}</p>}
+                </div>
+            )}
 
-            {/* Date and time */}
-            <div className="mt-2 flex items-center space-x-2 font-inter text-xs text-gray-500">
-                {/* Created at information */}
-                <p>
-                    Created At: {new Date(comment.createdAt).toLocaleDateString()}
-                </p>
-
-                {/* Conditionally render updated at information */}
-                {isUpdated && (
-                    <p>
-                        Updated At: {new Date(comment.updatedAt).toLocaleDateString()}
-                    </p>
-                )}
-            </div>
-
-            {user.id === comment.userId._id && (
+            {user.id === comment.userId._id && !isDeleted && (
                 <div className="mt-2 flex-center gap-4 border-t border-gray-100 pt-3">
                     <p
                         className="font-inter text-sm green_gradient cursor-pointer"
@@ -127,9 +122,11 @@ const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
                 </div>
             )}
 
-            <button className="text-blue-500 text-sm mt-2" onClick={() => setShowReplyBox(!showReplyBox)}>
-                Reply
-            </button>
+            {!isDeleted && (
+                <button className="text-blue-500 text-sm mt-2" onClick={() => setShowReplyBox(!showReplyBox)}>
+                    Reply
+                </button>
+            )}
 
             {showReplyBox && (
                 <div className="mt-2">

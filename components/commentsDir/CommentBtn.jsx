@@ -33,7 +33,7 @@ const CommentBtn = ({ post }) => {
         };
 
         fetchCommentsAndCount(); // Fetch comments and their count whenever dependencies change
-    }, [postId]);
+    }, [postId, totalCommentsAndRepliesCount]);
 
     // Handle navigation when the prompt is clicked
     const handlePromptClick = async () => {
