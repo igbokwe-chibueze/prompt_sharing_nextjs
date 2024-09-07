@@ -94,22 +94,43 @@ export const DELETE = async (request, { params }) => {
             return new Response("Comment not found", { status: 404 });
         }
 
-        // Check if the comment has replies
-        const hasReplies = await Comment.countDocuments({ parentCommentId: commentId });   
+        // Check if the comment has non-deleted replies
+        const hasNonDeletedReplies = await Comment.countDocuments({ 
+            parentCommentId: commentId,
+            $or: [{ deletedAt: { $exists: false } }, { deletedAt: null }]
+        });
 
-        if (hasReplies) {
-            // If the comment has replies, "soft delete" it by setting deletedAt, this  keep replies intact
+        if (hasNonDeletedReplies) {
+            // If the comment has non-deleted replies, "soft delete" it
             comment.deletedAt = new Date();
             comment.content = "This comment is no longer available";
             await comment.save();
         } else {
-            // If the comment has no replies, hard delete it
+            // If the comment has no non-deleted replies, hard delete it
             await Comment.findByIdAndDelete(commentId);
+
+            // Check if this comment was a reply to a soft-deleted parent
+            if (comment.parentCommentId) {
+                const parentComment = await Comment.findById(comment.parentCommentId);
+                if (parentComment && parentComment.deletedAt) {
+                    // Check if the parent has any other non-deleted replies
+                    const parentHasOtherReplies = await Comment.countDocuments({
+                        parentCommentId: comment.parentCommentId,
+                        _id: { $ne: commentId }, // Exclude the current comment
+                        $or: [{ deletedAt: { $exists: false } }, { deletedAt: null }]
+                    });
+
+                    if (!parentHasOtherReplies) {
+                        // If the parent has no other non-deleted replies, hard delete it
+                        await Comment.findByIdAndDelete(comment.parentCommentId);
+                    }
+                }
+            }
         }
 
-        return new Response("Comment marked as deleted successfully", { status: 200 });
+        return new Response("Comment deleted successfully", { status: 200 });
     } catch (error) {
-        console.error('Error marking comment as deleted:', error);
-        return new Response("Error marking comment as deleted", { status: 500 });
+        console.error('Error deleting comment:', error);
+        return new Response("Error deleting comment", { status: 500 });
     }
 };

@@ -173,59 +173,25 @@ const CommentList = ({ post }) => {
         }
     };
 
-    // const handleDelete = async (commentId) => {
-    //     const hasConfirmed = confirm(
-    //         "Are you sure you want to delete this prompt?"
-    //     );
-
-    //     if (hasConfirmed) {
-    //         try {
-    //           const res = await fetch(`/api/comments/${commentId}`, {
-    //             method: 'DELETE',
-    //           });
-          
-    //           if (res.ok) {
-    //             setComments((prevComments) => {
-    //               const deleteComment = (comments) => {
-    //                 return comments.filter(comment => {
-    //                   if (comment._id === commentId) {
-    //                     return false;
-    //                   }
-    //                   if (comment.replies) {
-    //                     comment.replies = deleteComment(comment.replies);
-    //                   }
-    //                   return true;
-    //                 });
-    //               };
-    //               return deleteComment(prevComments);
-    //             });
-    //             setTotalRootCommentsCount(prev => prev - 1);
-    //           }
-    //         } catch (error) {
-    //           console.error('Failed to delete comment:', error);
-    //         }
-    //     }
-            
-    // };
-
     const handleDelete = async (commentId) => {
         const hasConfirmed = confirm(
             "Are you sure you want to delete this comment?"
         );
-
+    
         if (hasConfirmed) {
             try {
                 const res = await fetch(`/api/comments/${commentId}`, {
                     method: 'DELETE',
                 });
-
+    
                 if (res.ok) {
                     setComments((prevComments) => {
                         const updateComments = (comments) => {
                             return comments.map(comment => {
                                 if (comment._id === commentId) {
-                                    // Check if the comment has replies
-                                    if (comment.replies && comment.replies.length > 0) {
+                                    // Check if the comment has non-deleted replies
+                                    const hasNonDeletedReplies = comment.replies && comment.replies.some(reply => !reply.deletedAt);
+                                    if (hasNonDeletedReplies) {
                                         // Soft delete: mark as deleted and update content
                                         return {
                                             ...comment,
@@ -238,9 +204,14 @@ const CommentList = ({ post }) => {
                                     }
                                 }
                                 if (comment.replies) {
+                                    const updatedReplies = updateComments(comment.replies).filter(Boolean);
+                                    // If this comment was soft-deleted and now has no replies, remove it
+                                    if (comment.deletedAt && updatedReplies.length === 0) {
+                                        return null;
+                                    }
                                     return {
                                         ...comment,
-                                        replies: updateComments(comment.replies).filter(Boolean),
+                                        replies: updatedReplies,
                                     };
                                 }
                                 return comment;
