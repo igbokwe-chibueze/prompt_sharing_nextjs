@@ -165,12 +165,6 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
         ))}
       </div>
 
-      <div>
-        {post.reposts?.map((p) => (
-          <p>{p.repostedBy?.username}</p>
-        ))}
-      </div>
-
       <div className="flex justify-between items-center">
         {/* Like Button */}
         <Liking post={post} session={session}/>

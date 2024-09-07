@@ -61,7 +61,7 @@ const Reposting = ({ post, session }) => {
     <>
         <div className="bookmark_btn" onClick={handleRepost} disabled={isRepostting}>
             <RepeatIcon className={`text-gray-800  ${isReposted ? "text-green-600" : "rounded-full hover:bg-green-200 hover:text-green-800"}`}/>
-            <span className="text-green-600">{`${isReposted ? "Resposted" : "Repost"}`}</span>
+            {/* <span className="text-green-600">{`${isReposted ? "Resposted" : "Repost"}`}</span> */}
             <p className="text-sm text-gray-700">{repostCount}</p>
         </div>
     </>
