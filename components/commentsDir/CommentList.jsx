@@ -173,40 +173,88 @@ const CommentList = ({ post }) => {
         }
     };
 
+    // const handleDelete = async (commentId) => {
+    //     const hasConfirmed = confirm(
+    //         "Are you sure you want to delete this prompt?"
+    //     );
+
+    //     if (hasConfirmed) {
+    //         try {
+    //           const res = await fetch(`/api/comments/${commentId}`, {
+    //             method: 'DELETE',
+    //           });
+          
+    //           if (res.ok) {
+    //             setComments((prevComments) => {
+    //               const deleteComment = (comments) => {
+    //                 return comments.filter(comment => {
+    //                   if (comment._id === commentId) {
+    //                     return false;
+    //                   }
+    //                   if (comment.replies) {
+    //                     comment.replies = deleteComment(comment.replies);
+    //                   }
+    //                   return true;
+    //                 });
+    //               };
+    //               return deleteComment(prevComments);
+    //             });
+    //             setTotalRootCommentsCount(prev => prev - 1);
+    //           }
+    //         } catch (error) {
+    //           console.error('Failed to delete comment:', error);
+    //         }
+    //     }
+            
+    // };
+
     const handleDelete = async (commentId) => {
         const hasConfirmed = confirm(
-            "Are you sure you want to delete this prompt?"
+            "Are you sure you want to delete this comment?"
         );
 
         if (hasConfirmed) {
             try {
-              const res = await fetch(`/api/comments/${commentId}`, {
-                method: 'DELETE',
-              });
-          
-              if (res.ok) {
-                setComments((prevComments) => {
-                  const deleteComment = (comments) => {
-                    return comments.filter(comment => {
-                      if (comment._id === commentId) {
-                        return false;
-                      }
-                      if (comment.replies) {
-                        comment.replies = deleteComment(comment.replies);
-                      }
-                      return true;
-                    });
-                  };
-                  return deleteComment(prevComments);
+                const res = await fetch(`/api/comments/${commentId}`, {
+                    method: 'DELETE',
                 });
-                setTotalRootCommentsCount(prev => prev - 1);
-              }
+
+                if (res.ok) {
+                    setComments((prevComments) => {
+                        const updateComments = (comments) => {
+                            return comments.map(comment => {
+                                if (comment._id === commentId) {
+                                    // Check if the comment has replies
+                                    if (comment.replies && comment.replies.length > 0) {
+                                        // Soft delete: mark as deleted and update content
+                                        return {
+                                            ...comment,
+                                            content: "This comment is no longer available",
+                                            deletedAt: new Date(),
+                                        };
+                                    } else {
+                                        // Hard delete: remove the comment
+                                        return null;
+                                    }
+                                }
+                                if (comment.replies) {
+                                    return {
+                                        ...comment,
+                                        replies: updateComments(comment.replies).filter(Boolean),
+                                    };
+                                }
+                                return comment;
+                            }).filter(Boolean); // Remove null values (hard deleted comments)
+                        };
+                        return updateComments(prevComments);
+                    });
+                    setTotalRootCommentsCount(prev => prev - 1);
+                }
             } catch (error) {
-              console.error('Failed to delete comment:', error);
+                console.error('Failed to delete comment:', error);
             }
         }
-            
-      };
+    };
 
     return (
         <div className="comment-list">
