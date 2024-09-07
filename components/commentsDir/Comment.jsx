@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { LoadingIcon } from '@constants/icons';
 
-const Comment = ({ comment, onReply, onEdit, user, userDetails }) => {
+const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
     const router = useRouter();
 
     const [showReplyBox, setShowReplyBox] = useState(false);
@@ -31,6 +31,10 @@ const Comment = ({ comment, onReply, onEdit, user, userDetails }) => {
     const handleCancelEdit = () => {
         setEditContent(comment.content); // Reset the edited content to the original comment
         setShowEditBox(false); // Close the edit box
+    };
+
+    const handleDelete = () => {
+        onDelete(comment._id);
     };
 
     const handleProfileClick = async () => {
@@ -116,6 +120,7 @@ const Comment = ({ comment, onReply, onEdit, user, userDetails }) => {
                     </p>
                     <p
                         className="font-inter text-sm orange_gradient cursor-pointer"
+                        onClick={handleDelete}
                     >
                         Delete
                     </p>
@@ -144,7 +149,15 @@ const Comment = ({ comment, onReply, onEdit, user, userDetails }) => {
             {comment.replies && comment.replies.length > 0 && (
                 <div className="ml-4 border-l border-b border-gray-300 pl-4 mt-2">
                     {comment.replies.slice(0, visibleRepliesCount).map((reply) => (
-                        <Comment key={reply._id} comment={reply} onReply={onReply} onEdit={onEdit} user={user} userDetails={userDetails} />
+                        <Comment 
+                            key={reply._id} 
+                            comment={reply} 
+                            onReply={onReply} 
+                            onEdit={onEdit} 
+                            onDelete={onDelete}
+                            user={user} 
+                            userDetails={userDetails} 
+                        />
                     ))}
                     {visibleRepliesCount < comment.replies.length && (
                         <button

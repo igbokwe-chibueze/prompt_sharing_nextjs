@@ -173,6 +173,41 @@ const CommentList = ({ post }) => {
         }
     };
 
+    const handleDelete = async (commentId) => {
+        const hasConfirmed = confirm(
+            "Are you sure you want to delete this prompt?"
+        );
+
+        if (hasConfirmed) {
+            try {
+              const res = await fetch(`/api/comments/${commentId}`, {
+                method: 'DELETE',
+              });
+          
+              if (res.ok) {
+                setComments((prevComments) => {
+                  const deleteComment = (comments) => {
+                    return comments.filter(comment => {
+                      if (comment._id === commentId) {
+                        return false;
+                      }
+                      if (comment.replies) {
+                        comment.replies = deleteComment(comment.replies);
+                      }
+                      return true;
+                    });
+                  };
+                  return deleteComment(prevComments);
+                });
+                setTotalRootCommentsCount(prev => prev - 1);
+              }
+            } catch (error) {
+              console.error('Failed to delete comment:', error);
+            }
+        }
+            
+      };
+
     return (
         <div className="comment-list">
             {/* Show comments only in prompt details page */}
@@ -199,6 +234,7 @@ const CommentList = ({ post }) => {
                             comment={comment}
                             onReply={handleReply}
                             onEdit={handleEdit}
+                            onDelete={handleDelete}
                             user={user} // Pass user info to Comment component
                             userDetails={userDetails} // Pass user details to Comment component
                         />
