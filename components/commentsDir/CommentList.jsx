@@ -227,6 +227,26 @@ const CommentList = ({ post }) => {
         }
     };
 
+    const handleLike = (commentId, newLikesCount) => {
+        setComments((prevComments) => {
+            const updateLikes = (comments) => {
+                return comments.map(comment => {
+                    if (comment._id === commentId) {
+                        return { ...comment, likes: Array(newLikesCount).fill(user.id) };
+                    }
+                    if (comment.replies) {
+                        return {
+                            ...comment,
+                            replies: updateLikes(comment.replies),
+                        };
+                    }
+                    return comment;
+                });
+            };
+            return updateLikes(prevComments);
+        });
+    };
+
     return (
         <div className="comment-list">
             {/* Show comments only in prompt details page */}
@@ -254,6 +274,7 @@ const CommentList = ({ post }) => {
                             onReply={handleReply}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
+                            onLike={handleLike}
                             user={user} // Pass user info to Comment component
                             userDetails={userDetails} // Pass user details to Comment component
                         />

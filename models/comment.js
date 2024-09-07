@@ -29,6 +29,14 @@ const CommentSchema = new Schema({
         type: Date,
         default: Date.now,
     },
+    likes: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    bookmarks: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    }],
     deletedAt: {
         type: Date,
         default: null, // null means the comment is not deleted

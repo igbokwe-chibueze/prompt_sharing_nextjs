@@ -2,9 +2,9 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { LoadingIcon } from '@constants/icons';
+import { HeartIcon, LoadingIcon } from '@constants/icons';
 
-const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
+const Comment = ({ comment, onReply, onEdit, onDelete, onLike, user, userDetails }) => {
     const router = useRouter();
 
     const [showReplyBox, setShowReplyBox] = useState(false);
@@ -14,6 +14,9 @@ const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
 
     const [showEditBox, setShowEditBox] = useState(false);
     const [editContent, setEditContent] = useState(comment.content);
+
+    const [likes, setLikes] = useState(comment.likes?.length);
+    const [isLiked, setIsLiked] = useState(comment.likes?.includes(user.id));
 
     const handleReply = () => {
         onReply(comment._id, replyContent);
@@ -49,6 +52,26 @@ const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
         setLoadingMoreReplies(true);
         setVisibleRepliesCount((prevCount) => prevCount + 1); // Increment visible replies by 1
         setLoadingMoreReplies(false);
+    };
+
+    const handleLike = async () => {
+        try {
+            const res = await fetch(`/api/comments/${comment._id}/likeComment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.id }),
+            });
+
+            if (res.ok) {
+                console.log("ok")
+                const data = await res.json();
+                setLikes(data.likes);
+                setIsLiked(!isLiked);
+                if (onLike) onLike(comment._id, data.likes);
+            }
+        } catch (error) {
+            console.error('Failed to like/unlike comment:', error);
+        }
     };
 
     // Check if the comment has been updated/edited
@@ -99,9 +122,19 @@ const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
 
             {/* Only render date and actions if the comment is not deleted */}
             {!isDeleted && (
-                <div className="mt-2 flex items-center space-x-2 font-inter text-xs text-gray-500">
-                    <p>Created At: {new Date(comment.createdAt).toLocaleDateString()}</p>
-                    {isUpdated && <p>Updated At: {new Date(comment.updatedAt).toLocaleDateString()}</p>}
+                <div className='mt-2 space-y-2'>
+                    <div className="flex items-center space-x-2 font-inter text-xs text-gray-500">
+                        <p>Created At: {new Date(comment.createdAt).toLocaleDateString()}</p>
+                        {isUpdated && <p>Updated At: {new Date(comment.updatedAt).toLocaleDateString()}</p>}
+                    </div>
+
+                    <button 
+                        className={`flex items-center space-x-1 ${isLiked ? 'text-blue-500' : 'text-gray-500'}`} 
+                        onClick={handleLike}
+                    >
+                        <HeartIcon className={`text-gray-800 ${isLiked ? "fill-gray-800" : "hover:fill-gray-800"}`}/>
+                        <span className="text-sm text-gray-700">{likes}</span>
+                    </button>
                 </div>
             )}
 
