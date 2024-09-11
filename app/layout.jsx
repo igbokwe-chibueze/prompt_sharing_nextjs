@@ -1,7 +1,7 @@
-// app/layout.jsx
 import "@styles/globals.css";
+
 import Nav from "@components/Nav";
-import AppProviders from "@components/AppProviders";
+import Provider from "@components/Provider";
 
 export const metadata = {
   title: "PrompptSharingNextjs",
@@ -11,15 +11,16 @@ export const metadata = {
 const RootLayout = ({ children }) => (
   <html lang='en'>
     <body>
-      <AppProviders>
+      <Provider>
         <div className='main'>
           <div className='gradient' />
         </div>
+
         <main className='app'>
           <Nav />
           {children}
         </main>
-      </AppProviders>
+      </Provider>
     </body>
   </html>
 );

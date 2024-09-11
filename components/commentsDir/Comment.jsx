@@ -2,10 +2,10 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { BookmarkIcon, HeartIcon, LoadingIcon } from '@constants/icons';
+import { HeartIcon, LoadingIcon } from '@constants/icons';
 import BookmarkButton from '@components/engagements/BookmarkButton';
 
-const Comment = ({ comment, onReply, onEdit, onDelete, onLike, onBookmark, user, userDetails }) => {
+const Comment = ({ comment, onReply, onEdit, onDelete, onLike, user, userDetails }) => {
     const router = useRouter();
 
     const [showReplyBox, setShowReplyBox] = useState(false);
@@ -17,11 +17,7 @@ const Comment = ({ comment, onReply, onEdit, onDelete, onLike, onBookmark, user,
     const [editContent, setEditContent] = useState(comment.content);
 
     const [likes, setLikes] = useState(comment.likes?.length);
-    const [isLiked, setIsLiked] = useState(comment.likes?.includes(user.id));
-
-    const [bookmarks, setBookmarks] = useState(comment.bookmarks?.length);
-    const [isBookmarked, setIsBookmarked] = useState(comment.bookmarks?.includes(user.id));
-
+    const [isLiked, setIsLiked] = useState(comment.likes?.includes(user?.id));
 
     const handleReply = () => {
         onReply(comment._id, replyContent);
@@ -78,25 +74,6 @@ const Comment = ({ comment, onReply, onEdit, onDelete, onLike, onBookmark, user,
             console.error('Failed to like/unlike comment:', error);
         }
     };
-
-    // const handleBookmark = async () => {
-    //     try {
-    //         const res = await fetch(`/api/comments/${comment._id}/bookmarkComment`, {
-    //             method: 'POST',
-    //             headers: { 'Content-Type': 'application/json' },
-    //             body: JSON.stringify({ userId: user.id }),
-    //         });
-
-    //         if (res.ok) {
-    //             const data = await res.json();
-    //             setBookmarks(data.bookmarks);
-    //             setIsBookmarked(data.isBookmarked);
-    //             if (onBookmark) onBookmark(comment._id, data.bookmarks, data.isBookmarked);
-    //         }
-    //     } catch (error) {
-    //         console.error('Failed to bookmark/unbookmark comment:', error);
-    //     }
-    // };
 
     // Check if the comment has been updated/edited
   
@@ -162,20 +139,10 @@ const Comment = ({ comment, onReply, onEdit, onDelete, onLike, onBookmark, user,
                             <span className="text-sm text-gray-700">{likes}</span>
                         </button>
 
-                        {/* <button 
-                            className={`flex items-center space-x-1 ${isBookmarked ? 'text-blue-500' : 'text-gray-500'}`} 
-                            onClick={handleBookmark}
-                        >
-                            <BookmarkIcon className={`text-gray-800 ${isBookmarked ? "fill-gray-800" : "hover:fill-gray-800"}`}/>
-                            <span className="text-sm text-gray-700">{bookmarks}</span>
-                        </button> */}
-
-                        {/* <BookmarkButton itemId={comment._id} initialIsBookmarked={comment.bookmarks?.includes(user.id)} /> */}
-
                         <BookmarkButton 
-                            entityId={comment._id} 
+                            entity={comment} 
                             entityType="comment" 
-                            userId= {user.id}
+                            user={user}
                             initialCount={comment.bookmarks.length}
                         />
                     </div>

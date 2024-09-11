@@ -1,83 +1,63 @@
-'use client';
+import { BookmarkIcon } from '@constants/icons';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react'
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useBookmark } from '@/contexts/BookmarkContext';
-import { BookmarkIcon, LoadingIcon } from '@constants/icons';
+const BookmarkButton = ({ entity, user, entityType }) => {
 
-export default function BookmarkButton({ entityId, entityType, initialCount }) {
-  const { data: session } = useSession();
-  const { updateBookmarkState, fetchBookmarkStatus } = useBookmark();
+    const router = useRouter();
+    const [isBookmarked, setIsBookmarked] = useState(entity?.bookmarks.includes(user.id));
+    const [bookmarkCount, setBookmarkCount] = useState(entity?.bookmarks.length);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [bookmarkCount, setBookmarkCount] = useState(initialCount);
-  const [loading, setLoading] = useState(false);
-  const [bookmarked, setBookmarked] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-    const fetchInitialStatus = async () => {
-      if (session?.user?.id) {
-        const status = await fetchBookmarkStatus(entityId, entityType);
-        if (isMounted) {
-          setBookmarked(status);
+    const handleBookmark = async () => {
+        if (!user) {
+            router.push(`/login?message=You need to be logged in to bookmark this post.`);
+            return;
         }
-      }
+
+        const newBookmarkedStatus = !isBookmarked;
+        setIsBookmarked(newBookmarkedStatus);
+        setIsSubmitting(true);
+
+        try {
+            const response = await fetch(`/api/bookmark/${entity._id}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    userId: user.id,
+                    entityType: entityType
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to update bookmark");
+            }
+
+            const data = await response.json();
+            setBookmarkCount(data.bookmarks);
+        } catch (error) {
+            console.log("Error:", error);
+            setIsBookmarked(!newBookmarkedStatus);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    fetchInitialStatus();
-    return () => {
-      isMounted = false;
-    };
-  }, [session, entityId, entityType, fetchBookmarkStatus]);
+    return (
+        <div className='flex items-center'>
+            <div 
+                onClick={handleBookmark} disabled={isSubmitting}
+                className="p-2 rounded-full transition-colors duration-200 text-gray-800 hover:bg-gray-300"
+            >
+                <BookmarkIcon className={`text-gray-800 ${isBookmarked ? "fill-gray-800" : ""}`}/>
+                <span className="sr-only">{isBookmarked ? 'Unbookmark' : 'Bookmark'}</span>
+            </div>
 
-  const toggleBookmark = async () => {
-    if (!session) {
-      console.log('User not authenticated');
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const res = await fetch(`/api/bookmark/${entityId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          entityType,
-          userId: session.user.id,
-          action: 'toggle'
-        }),
-      });
-
-      if (!res.ok) throw new Error('Failed to toggle bookmark');
-      const data = await res.json();
-
-      updateBookmarkState(entityId, entityType, data.isBookmarked);
-      setBookmarked(data.isBookmarked);
-      setBookmarkCount(data.bookmarkCount);
-    } catch (error) {
-      console.error('Error toggling bookmark:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <button 
-      onClick={toggleBookmark} 
-      disabled={loading}
-      className="flex items-center p-2 rounded-full transition-colors duration-200 text-gray-800 hover:bg-gray-300"
-      aria-label={bookmarked ? 'Remove bookmark' : 'Add bookmark'}
-    >
-      {loading ? (
-        <LoadingIcon className="w-5 h-5 animate-spin fill-gray-800" />
-      ) : (
-        <BookmarkIcon className={`w-5 h-5 ${bookmarked ? 'fill-gray-800' : ''}`}  />
-      )}
-      <span className="sr-only">{bookmarked ? 'Unbookmark' : 'Bookmark'}</span>
-      <span className="text-sm text-gray-500" aria-live="polite">{bookmarkCount}</span>
-    </button>
-  );
+            <p className="text-sm text-gray-500">{bookmarkCount}</p>
+        </div>
+    );
 }
+
+export default BookmarkButton

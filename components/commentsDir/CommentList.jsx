@@ -246,32 +246,7 @@ const CommentList = ({ post }) => {
             return updateLikes(prevComments);
         });
     };
-
-    // const handleBookmark = (commentId, newBookmarksCount, isBookmarked) => {
-    //     setComments((prevComments) => {
-    //         const updateBookmarks = (comments) => {
-    //             return comments.map(comment => {
-    //                 if (comment._id === commentId) {
-    //                     return { 
-    //                         ...comment, 
-    //                         bookmarks: isBookmarked 
-    //                             ? [...(comment.bookmarks || []), user.id]
-    //                             : (comment.bookmarks || []).filter(id => id !== user.id)
-    //                     };
-    //                 }
-    //                 if (comment.replies) {
-    //                     return {
-    //                         ...comment,
-    //                         replies: updateBookmarks(comment.replies),
-    //                     };
-    //                 }
-    //                 return comment;
-    //             });
-    //         };
-    //         return updateBookmarks(prevComments);
-    //     });
-    // };
-
+    
     return (
         <div className="comment-list">
             {/* Show comments only in prompt details page */}
@@ -300,7 +275,6 @@ const CommentList = ({ post }) => {
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                             onLike={handleLike}
-                            //onBookmark={handleBookmark}
                             user={user} // Pass user info to Comment component
                             userDetails={userDetails} // Pass user details to Comment component
                         />
