@@ -247,30 +247,30 @@ const CommentList = ({ post }) => {
         });
     };
 
-    const handleBookmark = (commentId, newBookmarksCount, isBookmarked) => {
-        setComments((prevComments) => {
-            const updateBookmarks = (comments) => {
-                return comments.map(comment => {
-                    if (comment._id === commentId) {
-                        return { 
-                            ...comment, 
-                            bookmarks: isBookmarked 
-                                ? [...(comment.bookmarks || []), user.id]
-                                : (comment.bookmarks || []).filter(id => id !== user.id)
-                        };
-                    }
-                    if (comment.replies) {
-                        return {
-                            ...comment,
-                            replies: updateBookmarks(comment.replies),
-                        };
-                    }
-                    return comment;
-                });
-            };
-            return updateBookmarks(prevComments);
-        });
-    };
+    // const handleBookmark = (commentId, newBookmarksCount, isBookmarked) => {
+    //     setComments((prevComments) => {
+    //         const updateBookmarks = (comments) => {
+    //             return comments.map(comment => {
+    //                 if (comment._id === commentId) {
+    //                     return { 
+    //                         ...comment, 
+    //                         bookmarks: isBookmarked 
+    //                             ? [...(comment.bookmarks || []), user.id]
+    //                             : (comment.bookmarks || []).filter(id => id !== user.id)
+    //                     };
+    //                 }
+    //                 if (comment.replies) {
+    //                     return {
+    //                         ...comment,
+    //                         replies: updateBookmarks(comment.replies),
+    //                     };
+    //                 }
+    //                 return comment;
+    //             });
+    //         };
+    //         return updateBookmarks(prevComments);
+    //     });
+    // };
 
     return (
         <div className="comment-list">
@@ -300,7 +300,7 @@ const CommentList = ({ post }) => {
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                             onLike={handleLike}
-                            onBookmark={handleBookmark}
+                            //onBookmark={handleBookmark}
                             user={user} // Pass user info to Comment component
                             userDetails={userDetails} // Pass user details to Comment component
                         />

@@ -1,5 +1,7 @@
 'use client';
 
+//components/Provider.jsx
+
 import { SessionProvider } from "next-auth/react";
 
 const Provider = ({ children, session }) => (

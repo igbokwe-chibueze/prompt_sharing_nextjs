@@ -1,3 +1,5 @@
+//app/page.jsx
+
 import Feed from "@components/Feed"
 import UserPictures from "@components/UserPictures"
 
