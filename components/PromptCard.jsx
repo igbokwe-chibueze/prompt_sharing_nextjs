@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import Rating from "./Rating";
-import Bookmarking from "./Bookmarking";
 import Liking from "./Liking";
 import Copy from "./Copy";
 import Sharing from "./sharing/Sharing";
@@ -13,6 +12,7 @@ import PostActivity from "./PostActivity";
 import { useState } from "react";
 import CommentList from "./commentsDir/CommentList";
 import CommentBtn from "./commentsDir/CommentBtn";
+import BookmarkButton from "./engagements/BookmarkButton";
 
 /**
  * PromptCard Component
@@ -25,15 +25,16 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
   const pathName = usePathname(); // Get the current route path
   const router = useRouter(); // Next.js router for navigation
 
+  const user = session?.user; // Destructure user information from session
+
   const [profileClickCount, setProfileClickCount] = useState(post.profileClickCount || 0);
   const [promptClickCount, setPromptClickCount] = useState(post.promptClickCount || 0);
 
   const [totalEngagements, setTotalEngagements] = useState(0);
 
-
   // Handles profile click - shows login popup if not logged in
   const handleProfileClick = async () => {
-    if (!session) {
+    if (!user) {
       // Redirect to login page with message
       const message = "You need to be logged in to view this profile. Please log in to continue.";
       router.push(`/login?message=${message}`);
@@ -41,7 +42,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
     }
 
     // Determine if the logged-in user is the creator of the prompt
-    if (post.creator._id !== session.user.id) {
+    if (post.creator._id !== user.id) {
       // Increment the profile click count if not the creator
       try {
         await fetch(`/api/prompt/${post._id}/incrementProfileClick`, {
@@ -58,7 +59,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
     }
 
     // Navigate to the appropriate profile page
-    if (post.creator._id === session.user.id) {
+    if (post.creator._id === user.id) {
       router.push("/profile"); // Navigate to logged-in user's profile
     } else {
       router.push(`/profile/${post.creator._id}?name=${post.creator.username}`); // Navigate to other user's profile
@@ -68,7 +69,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
 
   // Handles prompt click - shows login popup if not logged in
   const handlePromptClick = async () => {
-    if (!session) {
+    if (!user) {
       // Redirect to login page with message
       const message = "Sorry need to be logged in to view prompt details. Please log in to continue.";
       router.push(`/login?message=${message}`);
@@ -76,7 +77,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
     }
 
     // Determine if the logged-in user is the creator of the prompt
-    if (post.creator._id !== session.user.id) {
+    if (post.creator._id !== user.id) {
       // Increment the prompt click count if not the creator
       try {
         await fetch(`/api/prompt/${post._id}/incrementPromptClick`, {
@@ -189,7 +190,12 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
         </div>
 
         {/* Bookmark Button */}
-        <Bookmarking post={post} session={session}/>
+        <BookmarkButton 
+          entity={post} 
+          entityType="prompt" 
+          user={user}
+          initialCount={post.bookmarks.length}
+        />
         
         {/* Sharing */}
         <Sharing post={post}/>

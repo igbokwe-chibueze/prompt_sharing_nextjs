@@ -2,11 +2,11 @@ import { BookmarkIcon } from '@constants/icons';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react'
 
-const BookmarkButton = ({ entity, user, entityType }) => {
+const BookmarkButton = ({ entity, user, entityType, initialCount }) => {
 
     const router = useRouter();
-    const [isBookmarked, setIsBookmarked] = useState(entity?.bookmarks.includes(user.id));
-    const [bookmarkCount, setBookmarkCount] = useState(entity?.bookmarks.length);
+    const [isBookmarked, setIsBookmarked] = useState(entity?.bookmarks.includes(user?.id));
+    const [bookmarkCount, setBookmarkCount] = useState(initialCount);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleBookmark = async () => {
