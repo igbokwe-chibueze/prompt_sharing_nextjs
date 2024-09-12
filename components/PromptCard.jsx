@@ -97,7 +97,13 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
     router.push(`/promptDetails/${post._id}`);
   };
 
- 
+  
+  const engagementProps = {
+    entity: post,
+    entityType: "prompt",
+    user: user,
+  };
+
   // Check if the post has been updated/edited
   const isUpdated = post.updatedAt && post.updatedAt !== post.createdAt;
 
@@ -169,9 +175,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
       <div className="flex justify-between items-center">
         {/* Like Button */}
         <LikeButton
-          entity={post} 
-          entityType="prompt" 
-          user={user}
+          {...engagementProps}
           initialCount={post.likes.length}
         />
 

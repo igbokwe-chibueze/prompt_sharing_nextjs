@@ -2,11 +2,11 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { HeartIcon, LoadingIcon } from '@constants/icons';
+import { LoadingIcon } from '@constants/icons';
 import BookmarkButton from '@components/engagements/BookmarkButton';
 import LikeButton from '@components/engagements/LikeButton';
 
-const Comment = ({ comment, onReply, onEdit, onDelete, onLike, user, userDetails }) => {
+const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
     const router = useRouter();
 
     const [showReplyBox, setShowReplyBox] = useState(false);
@@ -16,9 +16,6 @@ const Comment = ({ comment, onReply, onEdit, onDelete, onLike, user, userDetails
 
     const [showEditBox, setShowEditBox] = useState(false);
     const [editContent, setEditContent] = useState(comment.content);
-
-    const [likes, setLikes] = useState(comment.likes?.length);
-    const [isLiked, setIsLiked] = useState(comment.likes?.includes(user?.id));
 
     const handleReply = () => {
         onReply(comment._id, replyContent);
@@ -56,28 +53,12 @@ const Comment = ({ comment, onReply, onEdit, onDelete, onLike, user, userDetails
         setLoadingMoreReplies(false);
     };
 
-    // const handleLike = async () => {
-    //     try {
-    //         const res = await fetch(`/api/comments/${comment._id}/likeComment`, {
-    //             method: 'POST',
-    //             headers: { 'Content-Type': 'application/json' },
-    //             body: JSON.stringify({ userId: user.id }),
-    //         });
+    const engagementProps = {
+        entity: comment,
+        entityType: "comment",
+        user: user,
+    };
 
-    //         if (res.ok) {
-    //             console.log("ok")
-    //             const data = await res.json();
-    //             setLikes(data.likes);
-    //             setIsLiked(!isLiked);
-    //             if (onLike) onLike(comment._id, data.likes);
-    //         }
-    //     } catch (error) {
-    //         console.error('Failed to like/unlike comment:', error);
-    //     }
-    // };
-
-    // Check if the comment has been updated/edited
-  
     const isUpdated = comment.updatedAt && comment.updatedAt !== comment.createdAt;
 
   // Check if comment is marked as deleted
@@ -134,16 +115,12 @@ const Comment = ({ comment, onReply, onEdit, onDelete, onLike, user, userDetails
                     <div className="flex justify-between items-center">
 
                         <LikeButton
-                            entity={comment} 
-                            entityType="comment" 
-                            user={user}
+                            {...engagementProps}
                             initialCount={comment.likes.length}
                         />
 
                         <BookmarkButton 
-                            entity={comment} 
-                            entityType="comment" 
-                            user={user}
+                            {...engagementProps}
                             initialCount={comment.bookmarks.length}
                         />
                     </div>
