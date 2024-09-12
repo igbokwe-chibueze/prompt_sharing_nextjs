@@ -97,7 +97,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
     router.push(`/promptDetails/${post._id}`);
   };
 
-  
+
   const engagementProps = {
     entity: post,
     entityType: "prompt",
@@ -200,14 +200,12 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
 
         {/* Bookmark Button */}
         <BookmarkButton 
-          entity={post} 
-          entityType="prompt" 
-          user={user}
+          {...engagementProps}
           initialCount={post.bookmarks.length}
         />
         
         {/* Sharing */}
-        <Sharing post={post}/>
+        <Sharing {...engagementProps} />
       </div>
 
       {/* Rating */}

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { LoadingIcon } from '@constants/icons';
 import BookmarkButton from '@components/engagements/BookmarkButton';
 import LikeButton from '@components/engagements/LikeButton';
+import Sharing from '@components/sharing/Sharing';
 
 const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
     const router = useRouter();
@@ -123,6 +124,8 @@ const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
                             {...engagementProps}
                             initialCount={comment.bookmarks.length}
                         />
+
+                        <Sharing {...engagementProps}/>
                     </div>
 
                 </div>
