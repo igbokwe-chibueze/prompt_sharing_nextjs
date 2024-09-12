@@ -1,4 +1,4 @@
-// pages/api/bookmark/[id].js
+// pages/api/like/[id].js
 
 import { connectToDB } from "@utils/database";
 import Comment from "@models/comment";
@@ -28,21 +28,21 @@ export const POST = async (request, { params }) => {
             return new Response("Entity not found", { status: 404 });
         }
 
-        const userBookmarkedIndex = entity.bookmarks.indexOf(userId);
+        const userLikedIndex = entity.likes.indexOf(userId);
 
-        if (userBookmarkedIndex === -1) {
+        if (userLikedIndex === -1) {
             // User hasn't bookmarked the entity, so add the bookmark
-            entity.bookmarks.push(userId);
+            entity.likes.push(userId);
         } else {
             // User has already bookmarked the entity, so remove the bookmark
-            entity.bookmarks.splice(userBookmarkedIndex, 1);
+            entity.likes.splice(userLikedIndex, 1);
         }
 
         await entity.save();
 
-        return new Response(JSON.stringify({ bookmarks: entity.bookmarks.length, isBookmarked: userBookmarkedIndex === -1 }), { status: 200 });
+        return new Response(JSON.stringify({ likes: entity.likes.length, isLiked: userLikedIndex === -1 }), { status: 200 });
     } catch (error) {
-        console.error('Error handling bookmark:', error);
-        return new Response("Error updating entity bookmarks", { status: 500 });
+        console.error('Error handling like:', error);
+        return new Response("Error updating entity likes", { status: 500 });
     }
 }

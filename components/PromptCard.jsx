@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import Rating from "./Rating";
-import Liking from "./Liking";
 import Copy from "./Copy";
 import Sharing from "./sharing/Sharing";
 import Reposting from "./Reposting";
@@ -13,6 +12,7 @@ import { useState } from "react";
 import CommentList from "./commentsDir/CommentList";
 import CommentBtn from "./commentsDir/CommentBtn";
 import BookmarkButton from "./engagements/BookmarkButton";
+import LikeButton from "./engagements/LikeButton";
 
 /**
  * PromptCard Component
@@ -168,7 +168,12 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
 
       <div className="flex justify-between items-center">
         {/* Like Button */}
-        <Liking post={post} session={session}/>
+        <LikeButton
+          entity={post} 
+          entityType="prompt" 
+          user={user}
+          initialCount={post.likes.length}
+        />
 
         {/* Comment Button */}
         <CommentBtn post={post}/>
