@@ -6,13 +6,11 @@ import { usePathname, useRouter } from "next/navigation";
 import Rating from "./Rating";
 import Copy from "./Copy";
 import Sharing from "./sharing/Sharing";
-import Reposting from "./Reposting";
 import PostActivity from "./PostActivity";
 import { useState } from "react";
 import CommentList from "./commentsDir/CommentList";
 import CommentBtn from "./commentsDir/CommentBtn";
-import BookmarkButton from "./engagements/BookmarkButton";
-import LikeButton from "./engagements/LikeButton";
+import { BookmarkButton, LikeButton, RepostButton } from "./engagements";
 
 /**
  * PromptCard Component
@@ -183,7 +181,10 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
         <CommentBtn post={post}/>
         
         {/* Reposting */}
-        <Reposting post={post} session={session}/>
+        <RepostButton
+          {...engagementProps}
+          initialCount={post.reposts.length}
+        />
 
         {/* Post Activity */}
         <div className="flex justify-start items-center">

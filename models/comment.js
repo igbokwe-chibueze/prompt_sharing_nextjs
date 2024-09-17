@@ -1,5 +1,6 @@
 
 import { Schema, model, models } from 'mongoose';
+import RepostSchema from './repost';
 
 const CommentSchema = new Schema({
     postId: { 
@@ -29,6 +30,7 @@ const CommentSchema = new Schema({
         type: Date,
         default: Date.now,
     },
+    reposts: [RepostSchema],
     likes: [{
         type: Schema.Types.ObjectId,
         ref: 'User'

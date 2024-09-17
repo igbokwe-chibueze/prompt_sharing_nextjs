@@ -3,8 +3,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { LoadingIcon } from '@constants/icons';
-import BookmarkButton from '@components/engagements/BookmarkButton';
-import LikeButton from '@components/engagements/LikeButton';
+import { BookmarkButton, LikeButton, RepostButton } from '@components/engagements';
 import Sharing from '@components/sharing/Sharing';
 
 const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
@@ -118,6 +117,11 @@ const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
                         <LikeButton
                             {...engagementProps}
                             initialCount={comment.likes.length}
+                        />
+
+                        <RepostButton
+                            {...engagementProps}
+                            initialCount={comment.reposts.length}
                         />
 
                         <BookmarkButton 
