@@ -27,14 +27,14 @@ const RepostCard = ({ repost, originalPost, handleTagClick }) => {
 
 
   return (
-    <div className="repost_card">
+    <div>
       <div 
         className="flex justify-start items-scenter px-6 pb-2 space-x-2 font-inter text-sm text-gray-500 cursor-pointer"
         onClick={handleProfileClick}
       >
         <RepeatIcon/>
         <h3>
-            {repost.repostedBy.username} reposted:
+            {repost.repostedBy.username} reposted: At: {new Date(repost.repostedAt).toLocaleDateString()}
         </h3>
       </div>
 

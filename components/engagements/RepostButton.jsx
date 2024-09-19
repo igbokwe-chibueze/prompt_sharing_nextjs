@@ -1,14 +1,38 @@
 
 import { RepeatIcon } from '@constants/icons';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const RepostButton = ({ entity, user, entityType, initialCount }) => {
 
     const router = useRouter();
-    const [isReposted, setIsReposted] = useState(entity?.reposts.some(repost => repost.repostedBy === user?.id));
+    const [isReposted, setIsReposted] = useState(false);
     const [repostCount, setRepostCount] = useState(initialCount);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+
+    // Fetch repost status when the component mounts
+    useEffect(() => {
+        const fetchRepostStatus = async () => {
+            if (!user || !entity?._id) return;
+            
+            try {
+                const response = await fetch(`/api/repost/${entity._id}?userId=${user.id}&entityType=${entityType}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                const data = await response.json();
+                setIsReposted(data.isReposted);  // Assuming the API returns a boolean
+            } catch (error) {
+                console.error("Error fetching repost status:", error);
+            }
+        };
+
+        fetchRepostStatus();
+    }, [user, entity]);
 
     const handleRepost = async () => {
         if (!user) {
