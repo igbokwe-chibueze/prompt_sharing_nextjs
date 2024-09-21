@@ -3,14 +3,14 @@
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
-import Rating from "./Rating";
-import Copy from "./Copy";
-import Sharing from "./sharing/Sharing";
-import PostActivity from "./PostActivity";
+import Rating from "../Rating";
+import Copy from "../Copy";
+import Sharing from "../sharing/Sharing";
+import PostActivity from "../PostActivity";
 import { useState } from "react";
-import CommentList from "./commentsDir/CommentList";
-import CommentBtn from "./commentsDir/CommentBtn";
-import { BookmarkButton, LikeButton, RepostButton } from "./engagements";
+import CommentList from "../commentsDir/CommentList";
+import CommentBtn from "../commentsDir/CommentBtn";
+import { BookmarkButton, LikeButton, RepostButton } from "../engagements";
 
 /**
  * PromptCard Component

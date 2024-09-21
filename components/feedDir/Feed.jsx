@@ -1,59 +1,7 @@
-"use client"; // This is a client-side component
+"use client";
 
 import { useState, useEffect, Suspense } from "react";
-import PromptCard from "./PromptCard";
-import Loading from "@app/profile/loading";
-import RepostCard from "./RepostCard";
-import CommentFeedList from "./commentsDir/CommentFeedList";
-
-const PromptCardList = ({ data, handleTagClick }) => {
-  // Flatten the data to treat reposts as separate items from prompt posts for sorting
-  // This is to ensure the most recent posts or reposts shows ontop.
-  const flattenedData = [];
-
-  data.forEach(post => {
-    // Push the original post into the flattenedData array
-    flattenedData.push({
-      type: 'post',
-      post: post,
-      date: new Date(post.createdAt),
-    });
-
-    // Push each repost as a separate entity into the flattenedData array
-    post.reposts.forEach(repost => {
-      flattenedData.push({
-        type: 'repost',
-        post: post,  // Keep reference to the original post
-        repost: repost, // The repost object itself
-        date: new Date(repost.repostedAt), // Repost date
-      });
-    });
-  });
-
-  // Sort flattened data by date in descending order
-  const sortedData = flattenedData.sort((a, b) => b.date - a.date);
-
-  return (
-    <div className="mt-6">
-      <Suspense fallback={<Loading />}>
-        {sortedData.map((item, index) => (
-          <div key={index} className="relative space-y-6 py-8">
-            {/* Check if the item is a post or a repost and render accordingly */}
-            {item.type === 'post' ? (
-              <PromptCard post={item.post} handleTagClick={handleTagClick} />
-            ) : (
-              <RepostCard
-                originalPost={item.post}  // Pass original post to the repost card
-                repost={item.repost}
-                handleTagClick={handleTagClick}
-              />
-            )}
-          </div>
-        ))}
-      </Suspense>
-    </div>
-  );
-};
+import CombinedFeedList from "./CombinedFeedList";
 
 
 const Feed = () => {
@@ -133,12 +81,18 @@ const Feed = () => {
 
       {/* Display posts: either search results or all posts */}
       {searchText ? (
-        <PromptCardList data={searchedResults} handleTagClick={handleTagClick} />
+        <CombinedFeedList 
+          promptData={searchedResults} 
+          commentData={allComments} 
+          handleTagClick={handleTagClick} 
+        />
       ) : (
-        <PromptCardList data={allPosts} handleTagClick={handleTagClick} />
+        <CombinedFeedList 
+          promptData={allPosts} 
+          commentData={allComments} 
+          handleTagClick={handleTagClick} 
+        />
       )}
-
-      <CommentFeedList data={allComments}/>
     </section>
   );
 };

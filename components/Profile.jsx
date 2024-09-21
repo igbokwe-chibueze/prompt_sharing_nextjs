@@ -1,4 +1,4 @@
-import PromptCard from "./PromptCard";
+import PromptCard from "./promptDir/PromptCard";
 
 const Profile = ({ data, likes, bookmarks, handleEdit, handleDelete }) => {
   return (

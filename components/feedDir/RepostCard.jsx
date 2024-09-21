@@ -3,9 +3,9 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-import PromptCard from "./PromptCard";
+import PromptCard from "../promptDir/PromptCard";
 import { RepeatIcon } from "@constants/icons";
-import { Comment } from "./commentsDir";
+import { Comment } from "../commentsDir";
 
 const RepostCard = ({ repost, originalPost, cardType = "prompt", handleTagClick }) => {
     const { data: session } = useSession(); // Access session data for authentication

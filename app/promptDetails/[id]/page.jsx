@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import PromptCard from "@components/PromptCard";
+import PromptCard from "@components/promptDir/PromptCard";
 
 /**
  * PromptDetails Component
