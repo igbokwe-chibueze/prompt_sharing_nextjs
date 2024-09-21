@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 
 import PromptCard from "./PromptCard";
 import { RepeatIcon } from "@constants/icons";
+import { Comment } from "./commentsDir";
 
-const RepostCard = ({ repost, originalPost, handleTagClick }) => {
+const RepostCard = ({ repost, originalPost, cardType = "prompt", handleTagClick }) => {
     const { data: session } = useSession(); // Access session data for authentication
     const router = useRouter(); // Next.js router for navigation
 
@@ -25,6 +26,18 @@ const RepostCard = ({ repost, originalPost, handleTagClick }) => {
         }
     };
 
+    // Conditional rendering based on card type
+    const renderCard = () => {
+      switch (cardType) {
+        case "prompt":
+          return <PromptCard post={originalPost} handleTagClick={handleTagClick} />;
+        case "comment":
+          return <Comment comment={originalPost} user={session?.user} />;
+        default:
+          return null;
+      }
+    };
+
 
   return (
     <div>
@@ -38,11 +51,8 @@ const RepostCard = ({ repost, originalPost, handleTagClick }) => {
         </h3>
       </div>
 
-      {/* Embedded PromptCard */}
-      <PromptCard
-        post={originalPost}
-        handleTagClick={handleTagClick}
-      />
+      {/* Render the appropriate card based on cardType */}
+      {renderCard()}
     </div>
   );
 };

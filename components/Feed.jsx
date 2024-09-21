@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import PromptCard from "./PromptCard";
 import Loading from "@app/profile/loading";
 import RepostCard from "./RepostCard";
+import CommentFeedList from "./commentsDir/CommentFeedList";
 
 const PromptCardList = ({ data, handleTagClick }) => {
   // Flatten the data to treat reposts as separate items from prompt posts for sorting
@@ -57,6 +58,8 @@ const PromptCardList = ({ data, handleTagClick }) => {
 
 const Feed = () => {
   const [allPosts, setAllPosts] = useState([]); // Store fetched posts
+  const [allComments, setAllComments] = useState([]); // Store fetched comments
+
   const [searchText, setSearchText] = useState(""); // Search query state
   const [searchTimeout, setSearchTimeout] = useState(null); // Timeout for debouncing search
   const [searchedResults, setSearchedResults] = useState([]); // Store search results
@@ -68,9 +71,17 @@ const Feed = () => {
     setAllPosts(data); // Set the fetched data to allPosts state
   };
 
-  // Fetch posts when the component mounts
+  // Fetch all posts (prompts and reposts) from the API
+  const fetchComments = async () => {
+    const response = await fetch("/api/comments");
+    const data = await response.json();
+    setAllComments(data); // Set the fetched data to allPosts state
+  };
+
+  // Fetch comments when the component mounts
   useEffect(() => {
     fetchPosts();
+    fetchComments();
   }, []);
 
   // Filter posts based on search input
@@ -126,6 +137,8 @@ const Feed = () => {
       ) : (
         <PromptCardList data={allPosts} handleTagClick={handleTagClick} />
       )}
+
+      <CommentFeedList data={allComments}/>
     </section>
   );
 };
