@@ -11,24 +11,24 @@ const Feed = () => {
   const [searchTimeout, setSearchTimeout] = useState(null); // Timeout for debouncing search
   const [searchedResults, setSearchedResults] = useState([]); // Store search results
 
-  // Fetch all posts (prompts and reposts) from the API
-  const fetchPosts = async () => {
-    const response = await fetch("/api/prompt");
-    const data = await response.json();
-    setAllPosts(data); // Set the fetched data to allPosts state
-  };
-
-  // Fetch all comments from the API
-  const fetchComments = async () => {
-    const response = await fetch("/api/comments");
-    const data = await response.json();
-    setAllComments(data); // Set the fetched data to allComments state
+  const fetchContent = async () => {
+    try {
+      const [postsResponse, commentsResponse] = await Promise.all([
+        fetch("/api/prompt"),
+        fetch("/api/comments"),
+      ]);
+      const postsData = await postsResponse.json();
+      const commentsData = await commentsResponse.json();
+      setAllPosts(postsData);
+      setAllComments(commentsData);
+    } catch (error) {
+      console.error("Failed to fetch data:", error);
+    }
   };
 
   // Fetch posts and comments when the component mounts
   useEffect(() => {
-    fetchPosts();
-    fetchComments();
+    fetchContent();
   }, []);
 
   // Filter both posts and comments based on search input
