@@ -48,6 +48,10 @@ const PromptSchema = new Schema({
     type: Date,
     default: null,
   },
+  deletedAt: {
+    type: Date,
+    default: null, // null means the comment is not deleted
+  },
 });
 
 const Prompt = models.Prompt || model('Prompt', PromptSchema);

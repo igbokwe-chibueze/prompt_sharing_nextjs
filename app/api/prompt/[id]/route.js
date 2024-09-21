@@ -1,3 +1,4 @@
+import Comment from "@models/comment";
 import Prompt from "@models/prompt";
 import { connectToDB } from "@utils/database";
 
@@ -42,11 +43,34 @@ export const PATCH = async (request, { params }) => {
 };
 
 export const DELETE = async (request, { params }) => {
+    
     try {
         await connectToDB();
-        
-        // Find the prompt by ID and remove it
-        await Prompt.findByIdAndDelete(params.id);
+
+        const promptId = params.id;
+
+        // Find the prompt by ID
+        const prompt = await Prompt.findById(promptId);
+
+        if (!prompt) {
+            return new Response("prompt not found", { status: 404 });
+        }
+
+        // Check if the propmt has non-deleted comments and replies.
+        const hasNonDeletedComments = await Comment.countDocuments({ 
+            postId: promptId,
+            $or: [{ deletedAt: { $exists: false } }, { deletedAt: null }]
+        });
+
+        if (hasNonDeletedComments) {
+            // If the prompt has non-deleted comments, "soft delete" it
+            prompt.deletedAt = new Date();
+            prompt.prompt = "This prompt is no longer available";
+            await prompt.save();
+        } else {
+            // If the prompt has no non-deleted comments, hard delete it
+            await Prompt.findByIdAndDelete(promptId);
+        }
 
         return new Response("Prompt deleted successfully", { status: 200 });
     } catch (error) {

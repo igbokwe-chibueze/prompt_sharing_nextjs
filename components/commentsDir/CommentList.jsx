@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react';
 import { LoadingIcon } from '@constants/icons';
 import { usePathname } from 'next/navigation';
 
-const CommentList = ({ post }) => {
+const CommentList = ({ post, promptIsDeleted }) => {
     // Session management
     const { data: session } = useSession();
     const user = session?.user; // Destructure user information from session
@@ -232,20 +232,22 @@ const CommentList = ({ post }) => {
             {/* Show comments only in prompt details page */}
             {pathName === `/promptDetails/${postId}` && (
                 <div>
-                    <div className="mt-2">
-                        <textarea
-                            value={newComment}
-                            onChange={(e) => setNewComment(e.target.value)}
-                            placeholder="Write a comment..."
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                        />
-                        <button 
-                            onClick={handleNewComment}
-                            className="mt-2 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded-md"
-                        >
-                            Submit
-                        </button>
-                    </div>
+                    {!promptIsDeleted && (
+                        <div className="mt-2">
+                            <textarea
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                                placeholder="Write a comment..."
+                                className="w-full p-2 border border-gray-300 rounded-md"
+                            />
+                            <button 
+                                onClick={handleNewComment}
+                                className="mt-2 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded-md"
+                            >
+                                Submit
+                            </button>
+                        </div>
+                    )}
     
                     {comments.map((comment) => (
                         <Comment 

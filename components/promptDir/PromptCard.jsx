@@ -105,132 +105,142 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
   // Check if the post has been updated/edited
   const isUpdated = post.updatedAt && post.updatedAt !== post.createdAt;
 
+  // Check if post is marked as deleted
+  const isDeleted = !!post.deletedAt;
+
   return (
     <div className="prompt_card space-y-4">
-      <div className="flex justify-between items-start gap-5">
-        {/* User information and profile navigation */}
-        <div
-          className={"flex-1 flex justify-start items-center gap-3 cursor-pointer"}
-          onClick={handleProfileClick}
-        >
-          <Image
-            src={post.creator.image}
-            alt="user_image"
-            width={40}
-            height={40}
-            className="rounded-full object-contain"
-          />
-          <div className="flex flex-col">
-            <h3 className="font-satoshi font-semibold text-gray-900">
-              {post.creator.username}
-            </h3>
-            <p className="font-inter text-sm text-gray-500">
-              {post.creator.email}
-            </p>
+      {isDeleted ? (
+        <p className="italic text-gray-500">{post.prompt}</p>
+      ): (
+        <div className="space-y-4">
+          <div className="flex justify-between items-start gap-5">
+            {/* User information and profile navigation */}
+            <div
+              className={"flex-1 flex justify-start items-center gap-3 cursor-pointer"}
+              onClick={handleProfileClick}
+            >
+              <Image
+                src={post.creator.image}
+                alt="user_image"
+                width={40}
+                height={40}
+                className="rounded-full object-contain"
+              />
+              <div className="flex flex-col">
+                <h3 className="font-satoshi font-semibold text-gray-900">
+                  {post.creator.username}
+                </h3>
+                <p className="font-inter text-sm text-gray-500">
+                  {post.creator.email}
+                </p>
+              </div>
+            </div>
+
+            {/* Copy button */}
+            <Copy post={post}/>
           </div>
-        </div>
 
-        {/* Copy button */}
-        <Copy post={post}/>
-      </div>
-
-      {/* Prompt text and navigation to details */}
-      <p
-        className={`my-4 font-satoshi text-sm text-gray-700 ${pathName !== `/promptDetails/${post._id}` ? "cursor-pointer" : ""}`}
-        onClick={pathName !== `/promptDetails/${post._id}` ? handlePromptClick : undefined}
-      >
-        {post.prompt}
-      </p>
-
-      {/* Date and time */}
-      <div className=" flex items-center space-x-2 font-inter text-xs text-gray-500">
-        {/* Created at information */}
-        <p>
-          Created At: {new Date(post.createdAt).toLocaleDateString()}
-        </p>
-
-        {/* Conditionally render updated at information */}
-        {isUpdated && (
-          <p>
-            Updated At: {new Date(post.updatedAt).toLocaleDateString()}
-          </p>
-        )}
-      </div>    
-
-      {/* Tag with click functionality */}
-      <div className="flex justify-start items-center flex-wrap gap-2 mt-2">
-        {post.tags.map((tag, index) => (
+          {/* Prompt text and navigation to details */}
           <p
-            key={index}
-            className="font-inter text-sm blue_gradient cursor-pointer"
-            onClick={() => handleTagClick && handleTagClick(tag)}
+            className={`my-4 font-satoshi text-sm text-gray-700 ${pathName !== `/promptDetails/${post._id}` ? "cursor-pointer" : ""}`}
+            onClick={pathName !== `/promptDetails/${post._id}` ? handlePromptClick : undefined}
           >
-            #{tag}
+            {post.prompt}
           </p>
-        ))}
-      </div>
 
-      <div className="flex justify-between items-center">
-        {/* Like Button */}
-        <LikeButton
-          {...engagementProps}
-          initialCount={post.likes.length}
-        />
+          {/* Date and time */}
+          <div className=" flex items-center space-x-2 font-inter text-xs text-gray-500">
+            {/* Created at information */}
+            <p>
+              Created At: {new Date(post.createdAt).toLocaleDateString()}
+            </p>
 
-        {/* Comment Button */}
-        <CommentBtn post={post}/>
-        
-        {/* Reposting */}
-        <RepostButton
-          {...engagementProps}
-          initialCount={post.reposts.length}
-        />
+            {/* Conditionally render updated at information */}
+            {isUpdated && (
+              <p>
+                Updated At: {new Date(post.updatedAt).toLocaleDateString()}
+              </p>
+            )}
+          </div>    
 
-        {/* Post Activity */}
-        <div className="flex justify-start items-center">
-          
-          <PostActivity post={post} session={session} setEngagements={setTotalEngagements}/>
+          {/* Tag with click functionality */}
+          <div className="flex justify-start items-center flex-wrap gap-2 mt-2">
+            {post.tags.map((tag, index) => (
+              <p
+                key={index}
+                className="font-inter text-sm blue_gradient cursor-pointer"
+                onClick={() => handleTagClick && handleTagClick(tag)}
+              >
+                #{tag}
+              </p>
+            ))}
+          </div>
 
-          {/* Display Total Engagements */}
-          {totalEngagements > 0 && (
-            <div className="font-inter text-sm text-gray-700">
-              {totalEngagements}
+          <div className="flex justify-between items-center">
+            {/* Like Button */}
+            <LikeButton
+              {...engagementProps}
+              initialCount={post.likes.length}
+            />
+
+            {/* Comment Button */}
+            <CommentBtn post={post}/>
+            
+            {/* Reposting */}
+            <RepostButton
+              {...engagementProps}
+              initialCount={post.reposts.length}
+            />
+
+            {/* Post Activity */}
+            <div className="flex justify-start items-center">
+              
+              <PostActivity post={post} session={session} setEngagements={setTotalEngagements}/>
+
+              {/* Display Total Engagements */}
+              {totalEngagements > 0 && (
+                <div className="font-inter text-sm text-gray-700">
+                  {totalEngagements}
+                </div>
+              )}
+            </div>
+
+            {/* Bookmark Button */}
+            <BookmarkButton 
+              {...engagementProps}
+              initialCount={post.bookmarks.length}
+            />
+            
+            {/* Sharing */}
+            <Sharing {...engagementProps} />
+          </div>
+
+          {/* Rating */}
+          <Rating post={post} session={session}/>
+
+          {session?.user.id === post.creator._id && pathName !== "/" && (
+            <div className="mt-5 flex-center gap-4 border-t border-gray-100 pt-3">
+              <p
+                className="font-inter text-sm green_gradient cursor-pointer"
+                onClick={handleEdit}
+              >
+                Edit
+              </p>
+              <p
+                className="font-inter text-sm orange_gradient cursor-pointer"
+                onClick={handleDelete}
+              >
+                Delete
+              </p>
             </div>
           )}
         </div>
-
-        {/* Bookmark Button */}
-        <BookmarkButton 
-          {...engagementProps}
-          initialCount={post.bookmarks.length}
-        />
-        
-        {/* Sharing */}
-        <Sharing {...engagementProps} />
-      </div>
-
-      {/* Rating */}
-      <Rating post={post} session={session}/>
-
-      {session?.user.id === post.creator._id && pathName !== "/" && (
-        <div className="mt-5 flex-center gap-4 border-t border-gray-100 pt-3">
-          <p
-            className="font-inter text-sm green_gradient cursor-pointer"
-            onClick={handleEdit}
-          >
-            Edit
-          </p>
-          <p
-            className="font-inter text-sm orange_gradient cursor-pointer"
-            onClick={handleDelete}
-          >
-            Delete
-          </p>
-        </div>
       )}
 
+
       {/* Comment List */}
-      <CommentList post={post} />
+      <CommentList post={post} promptIsDeleted={isDeleted} />
     </div>
   );
 };
