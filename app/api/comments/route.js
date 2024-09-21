@@ -30,8 +30,10 @@ export const GET = async (request) => {
     try {
         await connectToDB();
 
-        // Fetch prompts and sort them by createdAt in descending order
-        const comments = await Comment.find({}).populate('userId').populate('reposts.repostedBy');
+        // Fetch comments where deletedAt is null. This is to make sure soft-deleted comments are not shown in the feed.
+        const comments = await Comment.find({deletedAt: null})
+            .populate('userId')
+            .populate('reposts.repostedBy');
 
         return new Response(JSON.stringify(comments), { status: 200 });
     } catch (error) {

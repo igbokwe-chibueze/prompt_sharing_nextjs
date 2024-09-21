@@ -5,8 +5,10 @@ export const GET = async (request) => {
     try {
         await connectToDB();
 
-        // Fetch prompts and sort them by createdAt in descending order
-        const prompts = await Prompt.find({}).populate('creator').populate('reposts.repostedBy');
+        // Fetch prompts where deletedAt is null. This is to make sure soft-deleted prompts are not shown in the feed.
+        const prompts = await Prompt.find({ deletedAt: null })
+            .populate('creator')
+            .populate('reposts.repostedBy');
 
         return new Response(JSON.stringify(prompts), { status: 200 });
     } catch (error) {
