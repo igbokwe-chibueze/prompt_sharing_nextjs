@@ -1,13 +1,12 @@
-
 import PromptCard from "@components/promptDir/PromptCard";
 import { useSession } from "next-auth/react";
 import RepostCard from "./RepostCard";
 import { Comment } from "@components/commentsDir";
 
-const CombinedFeedList = ({ promptData, commentData, handleTagClick }) => {
+const CombinedFeedList = ({ promptData = [], commentData = [], handleTagClick }) => {
   // Session management for user info (used in CommentFeedList)
   const { data: session } = useSession();
-  const user = session?.user; 
+  const user = session?.user;
 
   // Flatten prompt data (posts and reposts)
   const flattenedPromptData = [];
@@ -41,7 +40,7 @@ const CombinedFeedList = ({ promptData, commentData, handleTagClick }) => {
     });
 
     // Reposts
-    comment.reposts.forEach((repost) => {
+    comment.reposts?.forEach((repost) => {
       flattenedCommentData.push({
         type: "repost",
         comment: comment,
@@ -59,32 +58,32 @@ const CombinedFeedList = ({ promptData, commentData, handleTagClick }) => {
 
   return (
     <div>
-        {sortedCombinedData.map((item, index) => (
-            <div key={index} className="relative space-y-6 py-8">
-                {/* Render based on the type of item */}
-                {item.type === "post" ? (
-                    <PromptCard post={item.post} handleTagClick={handleTagClick} />
-                ) : item.type === "repost" && item.post ? (
-                    <RepostCard
-                        originalPost={item.post}
-                        repost={item.repost}
-                        handleTagClick={handleTagClick}
-                    />
-                ) : item.type === "comment" ? (
-                    <div className="prompt_card">
-                        <Comment comment={item.comment} user={user} />
-                    </div>
-                ) : (
-                    <div className="prompt_card">
-                        <RepostCard
-                            cardType={"comment"}
-                            originalPost={item.comment}
-                            repost={item.repost}
-                        />
-                    </div>
-                )}
+      {sortedCombinedData.map((item, index) => (
+        <div key={index} className="relative space-y-6 py-8">
+          {/* Render based on the type of item */}
+          {item.type === "post" ? (
+            <PromptCard post={item.post} handleTagClick={handleTagClick} />
+          ) : item.type === "repost" && item.post ? (
+            <RepostCard
+              originalPost={item.post}
+              repost={item.repost}
+              handleTagClick={handleTagClick}
+            />
+          ) : item.type === "comment" ? (
+            <div className="prompt_card">
+              <Comment comment={item.comment} user={user} />
             </div>
-        ))}
+          ) : (
+            <div className="prompt_card">
+              <RepostCard
+                cardType={"comment"}
+                originalPost={item.comment}
+                repost={item.repost}
+              />
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 };
