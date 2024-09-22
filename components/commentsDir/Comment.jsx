@@ -1,12 +1,13 @@
 // components/Comment.js
 import { useState } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { LoadingIcon } from '@constants/icons';
 import { BookmarkButton, LikeButton, RepostButton } from '@components/engagements';
 import Sharing from '@components/sharing/Sharing';
 
 const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
+    const pathName = usePathname(); // Get the current route path
     const router = useRouter();
 
     const [showReplyBox, setShowReplyBox] = useState(false);
@@ -47,6 +48,36 @@ const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
         }
     };
 
+    // Handles commentt click - shows login popup if not logged in
+    const handleCommentClick = async () => {
+        if (!user) {
+        // Redirect to login page with message
+            const message = "Sorry need to be logged in to view comment details. Please log in to continue.";
+            router.push(`/login?message=${message}`);
+            return;
+        }
+
+        // Determine if the logged-in user is the creator of the prompt
+        // if (post.creator._id !== user.id) {
+        // // Increment the prompt click count if not the creator
+        // try {
+        //     await fetch(`/api/prompt/${post._id}/incrementPromptClick`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     });
+        
+        //     setPromptClickCount(promptClickCount + 1);
+        // } catch (error) {
+        //     console.log("Error:", error);
+        // }
+        // }
+
+        // Navigate to the prompt details page
+        router.push(`/commentDetails/${comment._id}`);
+    };
+
     const handleSeeMoreReplies = () => {
         setLoadingMoreReplies(true);
         setVisibleRepliesCount((prevCount) => prevCount + 1); // Increment visible replies by 1
@@ -72,7 +103,7 @@ const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
                     <>
                         <div className="flex items-center mb-2 space-x-2 cursor-pointer" onClick={handleProfileClick}>
                             <Image
-                                src={comment.userId.image || userDetails?.userImage}
+                                src={comment.userId.image || userDetails?.userImage} //Note userDetails is only needed if i am not populating the comment by userId in the API
                                 alt={`${comment.userId.username || userDetails?.userName}'s profile picture`}
                                 width={40}
                                 height={40}
@@ -99,7 +130,12 @@ const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
                                 </div>
                             </div>
                         ) : (
-                            <p>{comment.content}</p>
+                            <p
+                                className={`${pathName !== `/commentDetails/${comment._id}` ? "cursor-pointer" : ""}`}
+                                onClick={pathName !== `/commentDetails/${comment._id}` ? handleCommentClick : undefined}
+                            >
+                                {comment.content}
+                            </p>
                         )}
                     </>
             )}

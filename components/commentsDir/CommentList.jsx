@@ -15,7 +15,7 @@ const CommentList = ({ post, promptIsDeleted }) => {
     // State management for comments, new comment input, and user details
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
-    const [userDetails, setUserDetails] = useState({ userName: "", userImage: "" });
+    const [userDetails, setUserDetails] = useState({ userName: "", userImage: "" }); //Note this is only needed if i am not populating the comment by userId in the API
 
     // State management for comments count and limits
     const [totalRootCommentsCount, setTotalRootCommentsCount] = useState(0);
@@ -47,6 +47,7 @@ const CommentList = ({ post, promptIsDeleted }) => {
         };
 
         // Fetch user details such as username and profile image
+        //Note this is only needed if i am not populating the comment by userId in the API
         const fetchUserDetails = async () => {
             try {
                 const response = await fetch(`/api/users/${user.id}/user-data`);
@@ -257,7 +258,8 @@ const CommentList = ({ post, promptIsDeleted }) => {
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                             user={user} // Pass user info to Comment component
-                            userDetails={userDetails} // Pass user details to Comment component
+                            //Note this is only needed if i am not populating the comment by userId in the API
+                            userDetails={userDetails} // Pass user details to Comment component 
                         />
                     ))}
                     
