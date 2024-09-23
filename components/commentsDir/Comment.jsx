@@ -96,7 +96,8 @@ const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
   const isDeleted = !!comment.deletedAt;
 
     return (
-        <div className="comment p-4 bg-gray-100 rounded-md my-2">
+        <div className="p-4">
+        {/* <div className="p-4 bg-gray-100 rounded-md"> */}
             {isDeleted ? (
                 <p className="italic text-gray-500">{comment.content}</p>
             ) : (
@@ -210,7 +211,8 @@ const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
 
             {/* Display nested replies */}
             {comment.replies && comment.replies.length > 0 && (
-                <div className="ml-4 border-l border-b border-gray-300 pl-4 mt-2">
+                <div className="mt-2">
+                {/* <div className="ml-4 border-l border-b border-gray-300 pl-4 mt-2"> */}
                     {comment.replies.slice(0, visibleRepliesCount).map((reply) => (
                         <Comment 
                             key={reply._id} 

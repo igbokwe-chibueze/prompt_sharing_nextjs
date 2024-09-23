@@ -3,6 +3,9 @@
 import Comment from "@models/comment";
 import { connectToDB } from "@utils/database";
 
+// Since this is recieving a dynamic post id, this should have been handled in prompt and not comments. This should have been
+//an endpoint under the dynamic prompt folder [id] i.e api/prompt/[id]/comments
+
 const populateReplies = async (commentId, limit = 2) => {
     const replies = await Comment.find({ parentCommentId: commentId })
         .sort({ createdAt: 1 })

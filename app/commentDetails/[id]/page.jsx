@@ -18,17 +18,20 @@ const CommentDetails = ({ params }) => {
   const router = useRouter(); // For navigation
 
   const [comment, setComment] = useState(null); // Holds the fetched comment data
+  const [replies, setReplies] = useState(null); // Holds the fetched comment data
   const [loading, setLoading] = useState(true); // Loading state for fetching
 
   const commentId = params.id; // Comment ID from the route
+  
+  const post = comment?.postId
 
   useEffect(() => {
     const fetchComment = async () => {
       try {
         const res = await fetch(`/api/comments/commentDetails/${commentId}`);
         const data = await res.json();
-        setComment(data);
-        console.log("Comment data: "+data)
+        setComment(data.comment);
+        setReplies(data.rootComments);
         setLoading(false);
       } catch (error) {
         console.error("Failed to fetch comment details:", error);
@@ -67,14 +70,36 @@ const CommentDetails = ({ params }) => {
         <h1 className="head_text text-left">
             <span className="blue_gradient">Comment Details</span>
         </h1>
+
+        <p>Number: {replies.length}</p>
+
+        <p>PostId: {post}</p>
+        <p>CommentId: {commentId}</p>
+
         {comment ? (
-            <Comment
-                comment={comment}
-                onReply={handleReply}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                user={user}
-            />
+            <div className="border p-4 bg-gray-100 rounded-md">
+                <Comment
+                    comment={comment}
+                    onReply={handleReply}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    user={user}
+                />
+
+                {replies.map((reply) => (
+                    <div className="border-t-2 pl-10 "
+                        key={reply._id}
+                    >
+                        <Comment 
+                            comment={reply}
+                            onReply={handleReply}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
+                            user={user}
+                        />
+                    </div>
+                ))}
+            </div>
         ) : (
             <div className="text-center">
             <p className="text-red-500">Comment not found.</p>

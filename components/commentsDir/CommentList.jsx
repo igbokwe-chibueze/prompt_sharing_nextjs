@@ -31,6 +31,8 @@ const CommentList = ({ post, promptIsDeleted }) => {
         const fetchCommentsAndCount = async () => {
             try {
                 // Fetch comments with replies based on the current limits
+                // Since this is recieving a dynamic post id, this should have been handled in prompt and not comments. This should have been
+                //an endpoint under the dynamic prompt folder [id] i.e api/prompt/[id]/comments
                 const responseComments = await fetch(`/api/comments/${postId}?commentsLimit=${commentsLimit}&repliesLimit=${repliesLimit}`);
                 const commentsData = await responseComments.json();
                 setComments(commentsData); // Update state with fetched comments
@@ -229,7 +231,7 @@ const CommentList = ({ post, promptIsDeleted }) => {
     };
 
     return (
-        <div className="comment-list">
+        <div>
             {/* Show comments only in prompt details page */}
             {pathName === `/promptDetails/${postId}` && (
                 <div>
