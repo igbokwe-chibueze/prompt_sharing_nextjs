@@ -71,11 +71,6 @@ const CommentDetails = ({ params }) => {
             <span className="blue_gradient">Comment Details</span>
         </h1>
 
-        <p>Number: {replies.length}</p>
-
-        <p>PostId: {post}</p>
-        <p>CommentId: {commentId}</p>
-
         {comment ? (
             <div className="border p-4 bg-gray-100 rounded-md">
                 <Comment
@@ -86,7 +81,7 @@ const CommentDetails = ({ params }) => {
                     user={user}
                 />
 
-                {replies.map((reply) => (
+                {replies?.map((reply) => (
                     <div className="border-t-2 pl-10 "
                         key={reply._id}
                     >

@@ -9,8 +9,7 @@ import Sharing from "../sharing/Sharing";
 import PostActivity from "../PostActivity";
 import { useState } from "react";
 import CommentList from "../commentsDir/CommentList";
-import CommentBtn from "../commentsDir/CommentBtn";
-import { BookmarkButton, LikeButton, RepostButton } from "../engagements";
+import { BookmarkButton, CommentButton, LikeButton, RepostButton } from "../engagements";
 
 /**
  * PromptCard Component
@@ -185,7 +184,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
             />
 
             {/* Comment Button */}
-            <CommentBtn post={post}/>
+            <CommentButton {...engagementProps}/>
             
             {/* Reposting */}
             <RepostButton

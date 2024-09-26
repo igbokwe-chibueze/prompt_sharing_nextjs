@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { LoadingIcon } from '@constants/icons';
-import { BookmarkButton, LikeButton, RepostButton } from '@components/engagements';
+import { BookmarkButton, CommentButton, LikeButton, RepostButton } from '@components/engagements';
 import Sharing from '@components/sharing/Sharing';
 
 const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
@@ -156,6 +156,8 @@ const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
                             initialCount={comment.likes.length}
                         />
 
+                        <CommentButton {...engagementProps}/>
+
                         <RepostButton
                             {...engagementProps}
                             initialCount={comment.reposts.length}
@@ -172,7 +174,7 @@ const Comment = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
                 </div>
             )}
 
-            {user.id === comment.userId._id && !isDeleted && (
+            {user?.id === comment.userId._id && !isDeleted && (
                 <div className="mt-2 flex-center gap-4 border-t border-gray-100 pt-3">
                     <p
                         className="font-inter text-sm green_gradient cursor-pointer"
