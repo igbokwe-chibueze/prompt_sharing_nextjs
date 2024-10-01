@@ -40,15 +40,31 @@ export const GET = async (request, { params }) => {
             const rootComments = await fetchRootComments(objectId, prompt, {
                 sort: { createdAt: -1 },
                 populate: "userId",
-            });
+            });  
 
-            return new Response(JSON.stringify({ comment, rootComments }), {
+            const populatedComments = [];
+
+            for (let comment of rootComments) {
+                const populatedComment = comment.toObject();
+                populatedComment.replies = await populateReplies(populatedComment._id );
+                populatedComments.push(populatedComment);
+            }
+
+            return new Response(JSON.stringify({ comment, populatedComments }), {
                 status: 200,
             });
         }
     } catch (error) {
         return new Response("Internal Server Error", { status: 500 });
     }
+};
+
+const populateReplies = async (commentId) => {
+    const replies = await Comment.find({ parentCommentId: commentId })
+        .sort({ createdAt: 1 })
+        .populate('userId', 'username image')
+
+    return replies;
 };
 
 // Helper function to fetch root-level comments based on entity type
@@ -59,8 +75,13 @@ const fetchRootComments = async (objectId, isPrompt, options = {}) => {
 
     // Apply optional sorting (e.g., by creation date) if specified in `options.sort`, default to no sorting.
     // Populate referenced fields (e.g., user details) if specified in `options.populate`, otherwise return raw ObjectIds.
-    return Comment.find(query).sort(options.sort || {}).populate(options.populate || "");
+    const rootComments = await Comment.find(query)
+        .sort(options.sort || {})
+        .populate(options.populate || "");
+
+    return rootComments;
 };
+
 
 // Helper function to recursively count nested comments
 const countCommentsRecursively = async (parentCommentId) => {
@@ -72,4 +93,59 @@ const countCommentsRecursively = async (parentCommentId) => {
     }
 
     return totalCount;
+};
+
+
+export const DELETE = async (request, { params }) => {
+    try {
+        await connectToDB();
+
+        const objectId = params.id;
+
+        // Find the comment by ID
+        const comment = await Comment.findById(objectId);
+
+        if (!comment) {
+            return new Response("Comment not found", { status: 404 });
+        }
+
+        // Check if the comment has non-deleted replies
+        const hasNonDeletedReplies = await Comment.countDocuments({ 
+            parentCommentId: objectId,
+            deletedAt: null, // Find only non-deleted replies
+        });
+
+        if (hasNonDeletedReplies) {
+            // If the comment has non-deleted replies, "soft delete" it
+            comment.deletedAt = new Date();
+            comment.content = "This comment is no longer available";
+            await comment.save();
+        } else {
+            // If the comment has no non-deleted replies, hard delete it
+            await Comment.findByIdAndDelete(objectId);
+
+            // Check if this comment was a reply to a soft-deleted parent
+            if (comment.parentCommentId) {
+                const parentComment = await Comment.findById(comment.parentCommentId);
+                if (parentComment && parentComment.deletedAt) {
+                    // Check if the parent has any other non-deleted replies
+                    const parentHasOtherReplies = await Comment.countDocuments({
+                        parentCommentId: comment.parentCommentId,
+                        _id: { $ne: objectId }, // Exclude the current comment
+                        deletedAt: null,
+                    });
+
+                    if (!parentHasOtherReplies) {
+                        // If the parent has no other non-deleted replies, hard delete it
+                        await Comment.findByIdAndDelete(comment.parentCommentId);
+                    }
+                }
+            }
+        }
+
+        return new Response("Comment deleted successfully", { status: 200 });
+    } catch (error) {
+        console.error('Error deleting comment:', error);
+        return new Response("Error deleting comment", { status: 500 });
+    }
 };
