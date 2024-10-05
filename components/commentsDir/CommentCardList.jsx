@@ -120,6 +120,11 @@ const CommentCardList = ({ params }) => {
         setCommentsLimit((prevLimit) => prevLimit + 2); // Increase the comments limit to fetch more comments
     };
 
+    const handleSeeMoreReplies = (rootCommentId) => {
+        // Redirect to the comment details page for the selected root comment
+        router.push(`/commentDetails/${rootCommentId}`);
+    };
+
   return (
     <div className="container mx-auto p-4">
         {loading ? (
@@ -151,17 +156,27 @@ const CommentCardList = ({ params }) => {
                         {/* Display nested replies for each root comment */}
                         {rootComment.replies?.length > 0 && (
                             <div className="pl-6 mt-2">
-                            {rootComment.replies.map((reply) => (
-                                <div key={reply._id} className="border-l-2 pl-4">
-                                <CommentCard 
-                                    comment={reply}
-                                    onReply={handleReply}
-                                    onEdit={handleEdit}
-                                    onDelete={handleDelete}
-                                    user={user}
-                                />
-                                </div>
-                            ))}
+                                {rootComment.replies.map((reply) => (
+                                    <div key={reply._id} className="border-l-2 pl-4">
+                                    <CommentCard 
+                                        comment={reply}
+                                        onReply={handleReply}
+                                        onEdit={handleEdit}
+                                        onDelete={handleDelete}
+                                        user={user}
+                                    />
+                                    </div>
+                                ))}
+
+                                {/* See More Replies Button */}
+                                {rootComment.replies?.length > 0 && (
+                                    <button
+                                        className="text-blue-700 mt-2 p-2 rounded-md hover:underline hover:bg-gray-200"
+                                        onClick={() => handleSeeMoreReplies(rootComment._id)}
+                                    >
+                                        Show more replies
+                                    </button>
+                                )}
                             </div>
                         )}
                         </div>
