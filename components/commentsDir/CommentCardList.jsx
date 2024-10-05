@@ -24,14 +24,18 @@ const CommentCardList = ({ params }) => {
     const commentId = params.id;
 
     useEffect(() => {
+
+        // NOTE !! Since this is recieving a dynamic post id, this fetch should have been handled in the prompt api route and not comments. 
+        // This should have been an endpoint under the dynamic prompt folder [id] i.e api/prompt/[id]/comments
         const fetchComment = async () => {
-            setLoading(true);
+            // Only set loading for the initial fetch, not when loading more comments
+            if (rootComments === null) setLoading(true);
+
             try {
                 const res = await fetch(`/api/comments/commentDetails/${commentId}?commentsLimit=${commentsLimit}`);
                 const data = await res.json();
                 setComment(data.comment);
                 setRootComments(data.populatedComments); // rootComments includes replies
-                setLoading(false);
 
                 // Fetch the total count of comments and replies
                 const responseCount = await fetch(`/api/comments/commentDetails/${commentId}?count=true`);
@@ -42,6 +46,7 @@ const CommentCardList = ({ params }) => {
                 console.error("Failed to fetch comment details:", error);
                 setLoading(false);
             } finally {
+                setLoading(false); // Stop loading once data is fetched
                 setIsLoadingMoreComments(false); // Reset loading state after fetching
             }
         };
@@ -98,7 +103,7 @@ const CommentCardList = ({ params }) => {
     
                     return updateComments(prevComments);
                 });
-    
+                setTotalRootCommentsCount(prev => prev - 1);
                 alert("Comment deleted successfully");
             } else {
                 alert("Failed to delete comment.");
@@ -115,80 +120,77 @@ const CommentCardList = ({ params }) => {
         setCommentsLimit((prevLimit) => prevLimit + 2); // Increase the comments limit to fetch more comments
     };
 
-    if (loading) {
-        return (
-        <div className="flex justify-center items-center h-screen">
-            <LoadingIcon className="animate-spin w-8 h-8 text-blue-500" />
-        </div>
-        );
-    }
-
   return (
     <div className="container mx-auto p-4">
+        {loading ? (
+            <div className="text-center">
+                <LoadingIcon className="animate-spin w-6 h-6 mx-auto text-black" />
+                <p>Loading comments...</p>
+            </div>
+        ) : comment ? (
+                <div className="border p-4 bg-gray-100 rounded-md">
+                    <CommentCard 
+                        comment={comment}
+                        onReply={handleReply}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        user={user}
+                    />
 
-        {comment ? (
-            <div className="border p-4 bg-gray-100 rounded-md">
-            <CommentCard 
-                comment={comment}
-                onReply={handleReply}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                user={user}
-            />
-
-            {/* Display root comments and their replies */}
-            {rootComments?.map((rootComment) => (
-                <div className="border-t-2 pl-10" key={rootComment._id}>
-                <CommentCard 
-                    comment={rootComment}
-                    onReply={handleReply}
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
-                    user={user}
-                />
-
-                {/* Display nested replies for each root comment */}
-                {rootComment.replies?.length > 0 && (
-                    <div className="pl-6 mt-2">
-                    {rootComment.replies.map((reply) => (
-                        <div key={reply._id} className="border-l-2 pl-4">
+                    {/* Display root comments and their replies */}
+                    {rootComments?.map((rootComment) => (
+                        <div className="border-t-2 pl-10" key={rootComment._id}>
                         <CommentCard 
-                            comment={reply}
+                            comment={rootComment}
                             onReply={handleReply}
                             onEdit={handleEdit}
                             onDelete={handleDelete}
                             user={user}
                         />
+
+                        {/* Display nested replies for each root comment */}
+                        {rootComment.replies?.length > 0 && (
+                            <div className="pl-6 mt-2">
+                            {rootComment.replies.map((reply) => (
+                                <div key={reply._id} className="border-l-2 pl-4">
+                                <CommentCard 
+                                    comment={reply}
+                                    onReply={handleReply}
+                                    onEdit={handleEdit}
+                                    onDelete={handleDelete}
+                                    user={user}
+                                />
+                                </div>
+                            ))}
+                            </div>
+                        )}
                         </div>
                     ))}
-                    </div>
-                )}
                 </div>
-            ))}
-            </div>
-        ) : (
-            <div className="text-center">
-            <p className="text-red-500">Comment not found.</p>
-            </div>
-        )}
-
-        <p>Count : {rootComments.length}</p>
+            ) : (
+                <div className="text-center">
+                <p className="text-red-500">Comment not found.</p>
+                </div>
+            )}
 
         {/* See More Btn */}
-        {rootComments.length < rootCommentsCount && (
-            <button 
-                onClick={handleSeeMoreComments} disabled={isLoadingMoreComments}
-                className={`group mt-2 px-4 py-2 rounded-full 
-                    ${isLoadingMoreComments ? "bg-gray-400 cursor-not-allowed" : "outline_btn"}`}
-            >
-                {isLoadingMoreComments ? 
-                    <span className="flex items-center space-x-2">
-                        <LoadingIcon className={"animate-spin fill-white w-4 h-4"} />
-                        <p>Loading...</p>
-                    </span> : 
-                    `See ${rootCommentsCount - rootComments.length} More Comments`
-                }
-            </button>
+        {rootComments?.length < rootCommentsCount && (
+            <div className="text-center mt-2">
+                <button
+                    className={`text-white px-4 py-2 rounded-md border border-black
+                        ${isLoadingMoreComments ? "bg-gray-400 border-0 cursor-not-allowed" : "bg-black hover:bg-transparent hover:text-black"}`}
+                    onClick={handleSeeMoreComments}
+                    disabled={isLoadingMoreComments}
+                >
+                    {isLoadingMoreComments ? 
+                        <span className="flex items-center space-x-2">
+                            <LoadingIcon className={"animate-spin fill-white w-4 h-4"} />
+                            <p>Loading...</p>
+                        </span> : 
+                        `See ${rootCommentsCount - rootComments.length} More Comments`
+                    }
+                </button>
+            </div>
         )}
 
     </div>
