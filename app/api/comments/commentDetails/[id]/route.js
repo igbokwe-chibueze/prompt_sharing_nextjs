@@ -9,7 +9,9 @@ export const GET = async (request, { params }) => {
         const objectId = params.id; // Post or comment ID
         const url = new URL(request.url);
         const countOnly = url.searchParams.get("count"); // Query param to check if only count is needed
+        const limit = parseInt(url.searchParams.get('commentsLimit'))
         const entityType = url.searchParams.get("entityType"); // Determines if it's a 'prompt' or 'comment'
+
         const prompt = entityType === "prompt"; // Check if entity type is 'prompt'
 
         // Handle count requests
@@ -17,7 +19,9 @@ export const GET = async (request, { params }) => {
             const rootComments = await fetchRootComments(objectId, prompt);
 
             // Initialize total comment count
-            let totalCommentCount = rootComments.length;
+            const rootCommentCount = rootComments.length;
+
+            let totalCommentCount = rootCommentCount;
 
             // Count nested replies, subtract deleted comments if necessary
             for (const comment of rootComments) {
@@ -25,7 +29,7 @@ export const GET = async (request, { params }) => {
                 totalCommentCount += await countCommentsRecursively(comment._id);
             }
 
-            return new Response(JSON.stringify({ totalCount: totalCommentCount }), {
+            return new Response(JSON.stringify({ totalCount: totalCommentCount, totalRootCommentCount: rootCommentCount }), {
                 status: 200,
             });
 
@@ -40,6 +44,7 @@ export const GET = async (request, { params }) => {
             const rootComments = await fetchRootComments(objectId, prompt, {
                 sort: { createdAt: -1 },
                 populate: "userId",
+                limit: limit,
             });  
 
             const populatedComments = [];
@@ -63,6 +68,7 @@ const populateReplies = async (commentId) => {
     const replies = await Comment.find({ parentCommentId: commentId })
         .sort({ createdAt: 1 })
         .populate('userId', 'username image')
+        .limit(1) // set how many replies are allowed to show.
 
     return replies;
 };
@@ -75,11 +81,16 @@ const fetchRootComments = async (objectId, isPrompt, options = {}) => {
 
     // Apply optional sorting (e.g., by creation date) if specified in `options.sort`, default to no sorting.
     // Populate referenced fields (e.g., user details) if specified in `options.populate`, otherwise return raw ObjectIds.
-    const rootComments = await Comment.find(query)
+    const baseQuery = Comment.find(query)
         .sort(options.sort || {})
         .populate(options.populate || "");
 
-    return rootComments;
+    // If a limit is specified, apply it
+    if (options.limit) {
+        baseQuery.limit(options.limit);
+    }
+
+    return await baseQuery;
 };
 
 

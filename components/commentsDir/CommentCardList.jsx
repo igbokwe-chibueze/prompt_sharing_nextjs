@@ -14,7 +14,12 @@ const CommentCardList = ({ params }) => {
     const router = useRouter();
     const [comment, setComment] = useState(null);
     const [rootComments, setRootComments] = useState(null);
+
+    const [rootCommentsCount, setTotalRootCommentsCount] = useState(0);
+    const [commentsLimit, setCommentsLimit] = useState(2); // Initial limit for comments
+
     const [loading, setLoading] = useState(true);
+    const [isLoadingMoreComments, setIsLoadingMoreComments] = useState(false); // Track loading state for "See More" button
 
     const commentId = params.id;
 
@@ -22,19 +27,27 @@ const CommentCardList = ({ params }) => {
         const fetchComment = async () => {
             setLoading(true);
             try {
-                const res = await fetch(`/api/comments/commentDetails/${commentId}`);
+                const res = await fetch(`/api/comments/commentDetails/${commentId}?commentsLimit=${commentsLimit}`);
                 const data = await res.json();
                 setComment(data.comment);
                 setRootComments(data.populatedComments); // rootComments includes replies
                 setLoading(false);
+
+                // Fetch the total count of comments and replies
+                const responseCount = await fetch(`/api/comments/commentDetails/${commentId}?count=true`);
+                const countData = await responseCount.json();
+
+                setTotalRootCommentsCount(countData.totalRootCommentCount); // Count of root comments (not replies)
             } catch (error) {
                 console.error("Failed to fetch comment details:", error);
                 setLoading(false);
+            } finally {
+                setIsLoadingMoreComments(false); // Reset loading state after fetching
             }
         };
 
         fetchComment();
-    }, [commentId]);
+    }, [commentId, commentsLimit]);
 
     const handleReply = async (commentId, replyContent) => {
         // Implement reply logic
@@ -95,10 +108,12 @@ const CommentCardList = ({ params }) => {
             alert("An error occurred while deleting the comment.");
         }
     };
-    
-    
-    
-    
+
+    // Handle the "See More Comments" button click
+    const handleSeeMoreComments = async () => {
+        setIsLoadingMoreComments(true); // Set loading state to true
+        setCommentsLimit((prevLimit) => prevLimit + 2); // Increase the comments limit to fetch more comments
+    };
 
     if (loading) {
         return (
@@ -155,6 +170,25 @@ const CommentCardList = ({ params }) => {
             <div className="text-center">
             <p className="text-red-500">Comment not found.</p>
             </div>
+        )}
+
+        <p>Count : {rootComments.length}</p>
+
+        {/* See More Btn */}
+        {rootComments.length < rootCommentsCount && (
+            <button 
+                onClick={handleSeeMoreComments} disabled={isLoadingMoreComments}
+                className={`group mt-2 px-4 py-2 rounded-full 
+                    ${isLoadingMoreComments ? "bg-gray-400 cursor-not-allowed" : "outline_btn"}`}
+            >
+                {isLoadingMoreComments ? 
+                    <span className="flex items-center space-x-2">
+                        <LoadingIcon className={"animate-spin fill-white w-4 h-4"} />
+                        <p>Loading...</p>
+                    </span> : 
+                    `See ${rootCommentsCount - rootComments.length} More Comments`
+                }
+            </button>
         )}
 
     </div>
