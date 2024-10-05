@@ -55,23 +55,36 @@ const CommentCardList = ({ params }) => {
             });
     
             if (res.ok) {
-                const result = await res.json();  // The API should return the updated comment or a success message
+                const result = await res.json(); // The API should return the updated comment or a success message
+                
+                setRootComments((prevComments) => {
+                    const updateComments = (comments) => {
+                        return comments.map(comment => {
+                            if (comment._id === commentId) {
+                                if (result.deletedAt) {
+                                    // Soft delete: mark as deleted and update content
+                                    return { ...comment, content: result.content, deletedAt: result.deletedAt };
+                                } else {
+                                    // Hard delete: return null to filter out the comment
+                                    return null;
+                                }
+                            }
     
-                if (result.deletedAt) {
-                    // Soft delete: update the content and deletedAt for the soft-deleted comment
-                    setRootComments((prevComments) =>
-                        prevComments.map((comment) =>
-                            comment._id === commentId
-                                ? { ...comment, content: result.content, deletedAt: result.deletedAt }
-                                : comment
-                        )
-                    );
-                } else {
-                    // Hard delete: filter the comment out from the state
-                    setRootComments((prevComments) =>
-                        prevComments.filter(comment => comment._id !== commentId)
-                    );
-                }
+                            // Check for replies: update the replies accordingly
+                            const updatedReplies = updateComments(comment.replies || []).filter(Boolean);
+                            
+                            // If the comment was soft-deleted and has no replies, filter it out
+                            if (comment.deletedAt && updatedReplies.length === 0) {
+                                return null;
+                            }
+    
+                            // Return the updated comment with its replies
+                            return { ...comment, replies: updatedReplies };
+                        }).filter(Boolean); // Remove null values (hard deleted comments)
+                    };
+    
+                    return updateComments(prevComments);
+                });
     
                 alert("Comment deleted successfully");
             } else {
@@ -82,6 +95,8 @@ const CommentCardList = ({ params }) => {
             alert("An error occurred while deleting the comment.");
         }
     };
+    
+    
     
     
 
