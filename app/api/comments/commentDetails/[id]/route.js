@@ -120,6 +120,9 @@ export const DELETE = async (request, { params }) => {
             comment.deletedAt = new Date();
             comment.content = "This comment is no longer available";
             await comment.save();
+
+            // Return the soft-deleted comment
+            return new Response(JSON.stringify(comment), { status: 200 });
         } else {
             // If the comment has no non-deleted replies, hard delete it
             await Comment.findByIdAndDelete(objectId);
@@ -141,9 +144,9 @@ export const DELETE = async (request, { params }) => {
                     }
                 }
             }
-        }
 
-        return new Response("Comment deleted successfully", { status: 200 });
+            return new Response(JSON.stringify({ message: "Comment hard deleted" }), { status: 200 });
+        }
     } catch (error) {
         console.error('Error deleting comment:', error);
         return new Response("Error deleting comment", { status: 500 });
