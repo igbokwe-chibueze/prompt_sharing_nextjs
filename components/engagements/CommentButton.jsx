@@ -22,7 +22,7 @@ const CommentButton = ({entity, entityType,}) => {
         };
 
         fetchCommentCount();
-    }, [objectId, commentsCount]);
+    }, [objectId, commentsCount, entityType]);
 
   return (
     <div

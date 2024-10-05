@@ -178,13 +178,13 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails }) 
             {user?.id === comment.userId._id && !isDeleted && (
                 <div className="mt-2 flex-center gap-4 border-t border-gray-100 pt-3">
                     <p
-                        className="font-inter text-sm green_gradient cursor-pointer"
+                        className="font-inter text-sm green_gradient cursor-pointer hover:text-purple-700"
                         onClick={() => setShowEditBox(!showEditBox)}
                     >
                         Edit
                     </p>
                     <p
-                        className="font-inter text-sm orange_gradient cursor-pointer"
+                        className="font-inter text-sm orange_gradient cursor-pointer hover:text-red-700"
                         onClick={handleDelete}
                     >
                         Delete
