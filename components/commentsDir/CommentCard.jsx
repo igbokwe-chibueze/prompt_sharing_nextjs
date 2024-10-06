@@ -10,7 +10,7 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails }) 
     const pathName = usePathname(); // Get the current route path
     const router = useRouter();
 
-    const [showReplyBox, setShowReplyBox] = useState(false);
+    const [showReplyBox, setShowReplyBox] = useState(true);
     const [replyContent, setReplyContent] = useState('');
 
     const [showEditBox, setShowEditBox] = useState(false);
@@ -32,6 +32,7 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails }) 
     const handleCancelEdit = () => {
         setEditContent(comment.content); // Reset the edited content to the original comment
         setShowEditBox(false); // Close the edit box
+        setShowReplyBox(!showReplyBox);
     };
 
     const handleDelete = () => {
@@ -195,14 +196,8 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails }) 
                 </div>
             )}
 
-            {!isDeleted && pathName !== `/commentDetails/${comment._id}` && (
-                <button className="text-blue-500 text-sm mt-2" onClick={() => setShowReplyBox(!showReplyBox)}>
-                    Reply
-                </button>
-            )}
-
             {/* Show the reply box if on comment details page, or if manually toggled */}
-            {(showReplyBox || pathName === `/commentDetails/${comment._id}`) && !showEditBox && (
+            {showReplyBox && pathName === `/commentDetails/${comment._id}` && (
                 <div className="mt-2">
                     <textarea
                         className="w-full p-2 border border-gray-300 rounded-md"
