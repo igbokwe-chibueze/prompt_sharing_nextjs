@@ -12,8 +12,6 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails }) 
 
     const [showReplyBox, setShowReplyBox] = useState(false);
     const [replyContent, setReplyContent] = useState('');
-    const [visibleRepliesCount, setVisibleRepliesCount] = useState(1); // Start with 1 reply visible
-    const [loadingMoreReplies, setLoadingMoreReplies] = useState(false);
 
     const [showEditBox, setShowEditBox] = useState(false);
     const [editContent, setEditContent] = useState(comment.content);
@@ -76,12 +74,6 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails }) 
 
         // Navigate to the prompt details page
         router.push(`/commentDetails/${comment._id}`);
-    };
-
-    const handleSeeMoreReplies = () => {
-        setLoadingMoreReplies(true);
-        setVisibleRepliesCount((prevCount) => prevCount + 1); // Increment visible replies by 1
-        setLoadingMoreReplies(false);
     };
 
     const engagementProps = {
