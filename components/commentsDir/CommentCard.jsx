@@ -114,10 +114,17 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails }) 
                                 placeholder="Edit your comment..."
                             />
                             <div className="mt-2 space-x-2">
-                                <button className="px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded-md" onClick={handleEdit}>
+                                <button 
+                                    className="px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded-md" 
+                                    onClick={handleEdit}
+                                >
                                     Save
                                 </button>
-                                <button className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-md" onClick={handleCancelEdit}>
+
+                                <button 
+                                    className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-md" 
+                                    onClick={handleCancelEdit}
+                                >
                                     Cancel
                                 </button>
                             </div>
@@ -171,7 +178,11 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails }) 
                 <div className="mt-2 flex-center gap-4 border-t border-gray-100 pt-3">
                     <p
                         className="font-inter text-sm green_gradient cursor-pointer hover:text-purple-700"
-                        onClick={() => setShowEditBox(!showEditBox)}
+                        //onClick={() => setShowEditBox(!showEditBox)}
+                        onClick={() => {
+                            setShowEditBox(!showEditBox);
+                            setShowReplyBox(false);
+                        }}
                     >
                         Edit
                     </p>
@@ -190,7 +201,8 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails }) 
                 </button>
             )}
 
-            {(showReplyBox || pathName === `/commentDetails/${comment._id}`) && (
+            {/* Show the reply box if on comment details page, or if manually toggled */}
+            {(showReplyBox || pathName === `/commentDetails/${comment._id}`) && !showEditBox && (
                 <div className="mt-2">
                     <textarea
                         className="w-full p-2 border border-gray-300 rounded-md"
