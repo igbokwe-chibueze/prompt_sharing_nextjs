@@ -184,13 +184,13 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails }) 
                 </div>
             )}
 
-            {!isDeleted && (
+            {!isDeleted && pathName !== `/commentDetails/${comment._id}` && (
                 <button className="text-blue-500 text-sm mt-2" onClick={() => setShowReplyBox(!showReplyBox)}>
                     Reply
                 </button>
             )}
 
-            {showReplyBox && (
+            {(showReplyBox || pathName === `/commentDetails/${comment._id}`) && (
                 <div className="mt-2">
                     <textarea
                         className="w-full p-2 border border-gray-300 rounded-md"

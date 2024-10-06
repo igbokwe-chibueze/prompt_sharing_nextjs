@@ -58,10 +58,46 @@ const CommentCardList = ({ params }) => {
         };
 
         fetchComment();
-    }, [commentId, commentsLimit, repliesLimit]);
+    }, [commentId, commentsLimit, repliesLimit, rootComments]);
 
+    
     const handleReply = async (commentId, replyContent) => {
-        // Implement reply logic
+        if (!replyContent) return;
+
+        try {
+            const res = await fetch(`/api/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    postId: commentId, // Use this to ensure the reply goes to the correct post or parent comment
+                    userId: user.id, // Assuming session user info is available
+                    content: replyContent,
+                    parentCommentId: commentId, // The comment being replied to
+                }),
+            });
+
+            if (res.ok) {
+                const newReply = await res.json();
+
+                // Add the new reply to the corresponding root comment in the state
+                setRootComments((prevComments) =>
+                    prevComments.map((comment) =>
+                        comment._id === commentId
+                            ? {
+                                ...comment,
+                                replies: [...comment.replies, newReply], // Add new reply
+                              }
+                            : comment
+                    )
+                );
+            } else {
+                alert('Failed to post reply');
+            }
+        } catch (error) {
+            console.error('Failed to post reply:', error);
+        }
     };
 
     const handleEdit = async (commentId, editContent) => {
