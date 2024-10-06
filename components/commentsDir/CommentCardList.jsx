@@ -23,6 +23,7 @@ const CommentCardList = ({ params }) => {
     const [repliesLimit, setRepliesLimit] = useState(1); // Fixed limit for nested replies
     const [isLoadingMoreReplies, setIsLoadingMoreReplies] = useState(false); // Track loading state for "See More" button on nested replies
 
+    const [loadingState, setLoadingState] = useState({ type: null, isLoading: false }); // Unified loading state
     const [loading, setLoading] = useState(true);
     
 
@@ -64,6 +65,8 @@ const CommentCardList = ({ params }) => {
     const handleReply = async (commentId, replyContent) => {
         if (!replyContent) return;
 
+        setLoadingState({ type: 'reply', isLoading: true }); // Set loading for reply
+
         try {
             const res = await fetch(`/api/comments`, {
                 method: 'POST',
@@ -97,6 +100,8 @@ const CommentCardList = ({ params }) => {
             }
         } catch (error) {
             console.error('Failed to post reply:', error);
+        } finally {
+            setLoadingState({ type: null, isLoading: false }); // Reset loading state
         }
     };
 
@@ -189,6 +194,7 @@ const CommentCardList = ({ params }) => {
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         user={user}
+                        loadingState={loadingState} // Pass the loading state as a prop
                     />
 
                     {/* Display root comments and their replies */}

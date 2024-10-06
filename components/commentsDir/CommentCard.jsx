@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { BookmarkButton, CommentButton, LikeButton, RepostButton } from '@components/engagements';
 import Sharing from '@components/sharing/Sharing';
 
-const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails }) => {
+const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails, loadingState  }) => {
 
     const pathName = usePathname(); // Get the current route path
     const router = useRouter();
@@ -29,8 +29,14 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails }) 
         }
     }, [searchParams]);
 
-    const handleReply = () => {
-        onReply(comment._id, replyContent);
+    const handleReply = async () => {
+        // Check if replyContent is empty
+        if (!replyContent) return;
+    
+        // Call the onReply function and pass in comment ID and reply content
+        await onReply(comment._id, replyContent); // Wait for the reply to be processed
+    
+        // Clear the reply content only after reply is successfully submitted
         setReplyContent('');
     };
 
@@ -216,9 +222,16 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails }) 
                         value={replyContent}
                         onChange={(e) => setReplyContent(e.target.value)}
                         placeholder="Write a reply..."
+                        disabled={loadingState.isLoading && loadingState.type === 'reply'} // Disable while loading
                     />
-                    <button className="mt-2 px-4 py-2 bg-blue-500 hover:bg-blue-700 text-white rounded-md" onClick={handleReply}>
-                        Submit
+                    <button
+                        //className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md"
+                        className={`bg-blue-500 text-white mt-2 px-4 py-2 rounded-md
+                            ${loadingState.isLoading && loadingState.type === 'reply' ? "bg-gray-400 cursor-not-allowed" : "hover:bg-blue-700"}`}
+                        onClick={handleReply}
+                        disabled={loadingState.isLoading && loadingState.type === 'reply'} // Disable while loading
+                    >
+                        {loadingState.isLoading && loadingState.type === 'reply' ? 'Submitting...' : 'Submit'}
                     </button>
                 </div>
             )}
