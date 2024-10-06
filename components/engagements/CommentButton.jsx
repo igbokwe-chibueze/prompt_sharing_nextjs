@@ -1,8 +1,12 @@
 import { ChatBubbleIcon } from "@constants/icons";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 
 const CommentButton = ({entity, entityType,}) => {
+
+    const router = useRouter();
+    const pathname = usePathname(); 
 
     // State management for comments count and limits
     const [commentsCount, setCommentsCount] = useState(0);
@@ -24,12 +28,15 @@ const CommentButton = ({entity, entityType,}) => {
         fetchCommentCount();
     }, [objectId, commentsCount, entityType]);
 
+    const handleCommentButtonClick = () => {
+        // Redirect to comment details page with query param to open and focus the reply box
+        router.push(`/commentDetails/${objectId}?reply=true`);
+    };
+
   return (
-    <div
-        className={`flex items-center`}
-    >
+    <div className={`flex items-center ${pathname === `/commentDetails/${objectId}` ? 'pointer-events-none' : ''}`}>
         <div
-            className="p-2 rounded-full transition-colors duration-200 text-gray-800 hover:bg-gray-300"
+            className="p-2 rounded-full transition-colors duration-200 text-gray-800 hover:bg-gray-300 cursor-pointer"
         >
             <ChatBubbleIcon className={`text-gray-800`}/>
         </div>

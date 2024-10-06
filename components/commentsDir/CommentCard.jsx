@@ -1,7 +1,7 @@
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { BookmarkButton, CommentButton, LikeButton, RepostButton } from '@components/engagements';
 import Sharing from '@components/sharing/Sharing';
 
@@ -9,6 +9,7 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails }) 
 
     const pathName = usePathname(); // Get the current route path
     const router = useRouter();
+    const searchParams = useSearchParams()
 
     const [showReplyBox, setShowReplyBox] = useState(true);
     const [replyContent, setReplyContent] = useState('');
@@ -16,10 +17,21 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails }) 
     const [showEditBox, setShowEditBox] = useState(false);
     const [editContent, setEditContent] = useState(comment.content);
 
+    const replyBoxRef = useRef(null); // Create a ref for the reply textarea
+
+    useEffect(() => {
+        // Open reply box and focus on it if the query param `reply=true` is present
+        if (searchParams.get('reply') === 'true') {
+            setShowReplyBox(true); // Open the reply box if not already open
+            if (replyBoxRef.current) {
+                replyBoxRef.current.focus(); // Automatically focus the reply box
+            }
+        }
+    }, [searchParams]);
+
     const handleReply = () => {
         onReply(comment._id, replyContent);
         setReplyContent('');
-        setShowReplyBox(false);
     };
 
     // Function to handle editting
@@ -179,7 +191,6 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails }) 
                 <div className="mt-2 flex-center gap-4 border-t border-gray-100 pt-3">
                     <p
                         className="font-inter text-sm green_gradient cursor-pointer hover:text-purple-700"
-                        //onClick={() => setShowEditBox(!showEditBox)}
                         onClick={() => {
                             setShowEditBox(!showEditBox);
                             setShowReplyBox(false);
@@ -200,6 +211,7 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails }) 
             {showReplyBox && pathName === `/commentDetails/${comment._id}` && (
                 <div className="mt-2">
                     <textarea
+                        ref={replyBoxRef} 
                         className="w-full p-2 border border-gray-300 rounded-md"
                         value={replyContent}
                         onChange={(e) => setReplyContent(e.target.value)}

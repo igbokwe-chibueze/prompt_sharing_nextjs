@@ -168,7 +168,7 @@ const CommentCardList = ({ params }) => {
     //     //router.push(`/commentDetails/${rootCommentId}`);
     // };
 
-    // If i dont want to redirect, i can stream in more reply instead. I prefer to redirect instead.
+    // If i dont want to redirect, i can stream in more reply instead. I prefer to redirect instead as above.
     const handleSeeMoreReplies = async () => {
         setIsLoadingMoreReplies(true);
         setRepliesLimit((prevLimit) => prevLimit + 1); // Increase the replies limit to fetch more replies
