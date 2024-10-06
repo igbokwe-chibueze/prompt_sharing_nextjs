@@ -9,7 +9,8 @@ export const GET = async (request, { params }) => {
         const objectId = params.id; // Post or comment ID
         const url = new URL(request.url);
         const countOnly = url.searchParams.get("count"); // Query param to check if only count is needed
-        const limit = parseInt(url.searchParams.get('commentsLimit'))
+        const limit = parseInt(url.searchParams.get('commentsLimit')) || undefined;
+        const replyLimit = parseInt(url.searchParams.get('repliesLimit')) || undefined;
         const entityType = url.searchParams.get("entityType"); // Determines if it's a 'prompt' or 'comment'
 
         const prompt = entityType === "prompt"; // Check if entity type is 'prompt'
@@ -49,9 +50,18 @@ export const GET = async (request, { params }) => {
 
             const populatedComments = [];
 
+            // for (let comment of rootComments) {
+            //     const populatedComment = comment.toObject();
+            //     populatedComment.replies = await populateReplies(populatedComment._id, replyLimit );
+            //     populatedComments.push(populatedComment);
+            // }
+
+            // This is not needed if nested replies navigate to the comment details page of its root comment instead use the commented out code above.
             for (let comment of rootComments) {
                 const populatedComment = comment.toObject();
-                populatedComment.replies = await populateReplies(populatedComment._id );
+                const { replies, totalReplyCount } = await populateReplies(populatedComment._id, replyLimit);
+                populatedComment.replies = replies;
+                populatedComment.totalReplyCount = totalReplyCount; // Add the total reply count to the comment object
                 populatedComments.push(populatedComment);
             }
 
@@ -64,13 +74,17 @@ export const GET = async (request, { params }) => {
     }
 };
 
-const populateReplies = async (commentId) => {
+const populateReplies = async (commentId, replyLimit) => {
     const replies = await Comment.find({ parentCommentId: commentId })
         .sort({ createdAt: 1 })
         .populate('userId', 'username image')
-        .limit(1) // set how many replies are allowed to show.
+        .limit(replyLimit) // set how many replies are allowed to show.
 
-    return replies;
+    // Fetch the total count of replies for the given commentId
+    // This is not needed if nested replies navigate to the comment details page of its root comment
+    const totalReplyCount = await Comment.countDocuments({ parentCommentId: commentId });
+
+    return { replies, totalReplyCount }; // totalReplyCount is not needed if the nested replies navigate to the comment details page of its root comment
 };
 
 // Helper function to fetch root-level comments based on entity type

@@ -13,13 +13,18 @@ const CommentCardList = ({ params }) => {
 
     const router = useRouter();
     const [comment, setComment] = useState(null);
-    const [rootComments, setRootComments] = useState(null);
 
+    const [rootComments, setRootComments] = useState(null);
     const [rootCommentsCount, setTotalRootCommentsCount] = useState(0);
     const [commentsLimit, setCommentsLimit] = useState(2); // Initial limit for comments
+    const [isLoadingMoreComments, setIsLoadingMoreComments] = useState(false); // Track loading state for "See More" button on root comments
+
+
+    const [repliesLimit, setRepliesLimit] = useState(1); // Fixed limit for nested replies
+    const [isLoadingMoreReplies, setIsLoadingMoreReplies] = useState(false); // Track loading state for "See More" button on nested replies
 
     const [loading, setLoading] = useState(true);
-    const [isLoadingMoreComments, setIsLoadingMoreComments] = useState(false); // Track loading state for "See More" button
+    
 
     const commentId = params.id;
 
@@ -32,7 +37,7 @@ const CommentCardList = ({ params }) => {
             if (rootComments === null) setLoading(true);
 
             try {
-                const res = await fetch(`/api/comments/commentDetails/${commentId}?commentsLimit=${commentsLimit}`);
+                const res = await fetch(`/api/comments/commentDetails/${commentId}?commentsLimit=${commentsLimit}&repliesLimit=${repliesLimit}`);
                 const data = await res.json();
                 setComment(data.comment);
                 setRootComments(data.populatedComments); // rootComments includes replies
@@ -48,11 +53,12 @@ const CommentCardList = ({ params }) => {
             } finally {
                 setLoading(false); // Stop loading once data is fetched
                 setIsLoadingMoreComments(false); // Reset loading state after fetching
+                setIsLoadingMoreReplies(false)
             }
         };
 
         fetchComment();
-    }, [commentId, commentsLimit]);
+    }, [commentId, commentsLimit, repliesLimit]);
 
     const handleReply = async (commentId, replyContent) => {
         // Implement reply logic
@@ -120,9 +126,16 @@ const CommentCardList = ({ params }) => {
         setCommentsLimit((prevLimit) => prevLimit + 2); // Increase the comments limit to fetch more comments
     };
 
-    const handleSeeMoreReplies = (rootCommentId) => {
-        // Redirect to the comment details page for the selected root comment
-        router.push(`/commentDetails/${rootCommentId}`);
+    // redirects to the comment details page of the root comment to show the replies.
+    // const handleSeeMoreReplies = (rootCommentId) => {
+    //     // Redirect to the comment details page for the selected root comment
+    //     //router.push(`/commentDetails/${rootCommentId}`);
+    // };
+
+    // If i dont want to redirect, i can stream in more reply instead. I prefer to redirect instead.
+    const handleSeeMoreReplies = async () => {
+        setIsLoadingMoreReplies(true);
+        setRepliesLimit((prevLimit) => prevLimit + 1); // Increase the replies limit to fetch more replies
     };
 
   return (
@@ -145,40 +158,52 @@ const CommentCardList = ({ params }) => {
                     {/* Display root comments and their replies */}
                     {rootComments?.map((rootComment) => (
                         <div className="border-t-2 pl-10" key={rootComment._id}>
-                        <CommentCard 
-                            comment={rootComment}
-                            onReply={handleReply}
-                            onEdit={handleEdit}
-                            onDelete={handleDelete}
-                            user={user}
-                        />
+                            <CommentCard 
+                                comment={rootComment}
+                                onReply={handleReply}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                                user={user}
+                            />
 
-                        {/* Display nested replies for each root comment */}
-                        {rootComment.replies?.length > 0 && (
-                            <div className="pl-6 mt-2">
-                                {rootComment.replies.map((reply) => (
-                                    <div key={reply._id} className="border-l-2 pl-4">
-                                    <CommentCard 
-                                        comment={reply}
-                                        onReply={handleReply}
-                                        onEdit={handleEdit}
-                                        onDelete={handleDelete}
-                                        user={user}
-                                    />
-                                    </div>
-                                ))}
+                            {/* Display nested replies for each root comment */}
+                            {rootComment.replies?.length > 0 && (
+                                <div className="pl-6 mt-2 space-y-4">
+                                    {rootComment.replies.map((reply) => (
+                                        <div key={reply._id} className="border-l-2 pl-4">
+                                            <div className="border-t-2 border-dotted">
+                                                <CommentCard 
+                                                    comment={reply}
+                                                    onReply={handleReply}
+                                                    onEdit={handleEdit}
+                                                    onDelete={handleDelete}
+                                                    user={user}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
 
-                                {/* See More Replies Button */}
-                                {rootComment.replies?.length > 0 && (
-                                    <button
-                                        className="text-blue-700 mt-2 p-2 rounded-md hover:underline hover:bg-gray-200"
-                                        onClick={() => handleSeeMoreReplies(rootComment._id)}
-                                    >
-                                        Show more replies
-                                    </button>
-                                )}
-                            </div>
-                        )}
+                            {/* See More Replies Button */}
+                            {rootComment.replies?.length < rootComment.totalReplyCount && (
+                                <button
+                                    //className="text-blue-700 mt-2 p-2 rounded-md hover:underline hover:bg-gray-200"
+                                    className={`text-blue-700 mt-2 p-2 rounded-md
+                                        ${isLoadingMoreReplies ? "bg-gray-400 border-0 cursor-not-allowed" : "hover:underline hover:bg-gray-200"}`}
+                                    disabled={isLoadingMoreReplies}
+                                    onClick={handleSeeMoreReplies}
+                                    //onClick={() => handleSeeMoreReplies(rootComment._id)} // Use this if you a rerouting.
+                                >
+                                    {isLoadingMoreReplies ? 
+                                        <span className="flex items-center space-x-2">
+                                            <LoadingIcon className={"animate-spin fill-white w-4 h-4"} />
+                                            <p>Loading...</p>
+                                        </span> : 
+                                        `See ${rootComment.totalReplyCount - rootComment.replies?.length} More Comments`
+                                    }
+                                </button>
+                            )}
                         </div>
                     ))}
                 </div>
