@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { BookmarkButton, CommentButton, LikeButton, RepostButton } from '@components/engagements';
 import Sharing from '@components/sharing/Sharing';
 
-const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails, loadingState  }) => {
+const CommentCard = ({ comment, onReply, onEdit, onDelete, user, loadingState  }) => {
 
     const pathName = usePathname(); // Get the current route path
     const router = useRouter();
@@ -115,8 +115,8 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails, lo
                 <>
                     <div className="flex items-center mb-2 space-x-2 cursor-pointer" onClick={handleProfileClick}>
                         <Image
-                            src={comment.userId.image || userDetails?.userImage} //Note userDetails is only needed if i am not populating the comment by userId in the API
-                            alt={`${comment.userId.username || userDetails?.userName}'s profile picture`}
+                            src={comment.userId.image }
+                            alt={`${comment.userId.username }'s profile picture`}
                             width={40}
                             height={40}
                             className="rounded-full object-contain"
@@ -136,6 +136,7 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails, lo
                                 <button 
                                     className="px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded-md" 
                                     onClick={handleEdit}
+                                    //disabled={loadingState.isLoading && loadingState.type === 'edit'}
                                 >
                                     Save
                                 </button>
@@ -143,12 +144,14 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails, lo
                                 <button 
                                     className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-md" 
                                     onClick={handleCancelEdit}
+                                    //disabled={loadingState.isLoading && loadingState.type === 'edit'}
                                 >
                                     Cancel
                                 </button>
                             </div>
                         </div>
                     ) : (
+                        // If not in edit mode, display the comment content
                         <p
                             className={`${pathName !== `/commentDetails/${comment._id}` ? "cursor-pointer" : ""}`}
                             onClick={pathName !== `/commentDetails/${comment._id}` ? handleCommentClick : undefined}
@@ -225,7 +228,6 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, userDetails, lo
                         disabled={loadingState.isLoading && loadingState.type === 'reply'} // Disable while loading
                     />
                     <button
-                        //className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-md"
                         className={`bg-blue-500 text-white mt-2 px-4 py-2 rounded-md
                             ${loadingState.isLoading && loadingState.type === 'reply' ? "bg-gray-400 cursor-not-allowed" : "hover:bg-blue-700"}`}
                         onClick={handleReply}

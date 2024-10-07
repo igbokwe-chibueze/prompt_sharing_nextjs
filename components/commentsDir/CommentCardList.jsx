@@ -105,9 +105,58 @@ const CommentCardList = ({ params }) => {
         }
     };
 
+
     const handleEdit = async (commentId, editContent) => {
-        // Implement edit logic
+        // Ensure we don't submit an empty or blank comment
+        if (!editContent.trim()) return;
+    
+        // Set loading state specifically for the edit action
+        setLoadingState({ type: 'edit', isLoading: true });
+    
+        try {
+            // Send a PUT request to the server to update the comment with the given commentId
+            const res = await fetch(`/api/comments/commentDetails/${commentId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json', // Specify the format of the request body
+                },
+                body: JSON.stringify({
+                    content: editContent, // Include the new content for the comment
+                }),
+            });
+    
+            // Check if the response was successful (status code 200-299)
+            if (res.ok) {
+                // Parse the updated comment from the server response
+                const updatedComment = await res.json();
+    
+                // Update the local state to reflect the edited comment
+                // This ensures that the UI reflects the changes immediately without requiring a page reload
+                setRootComments((prevComments) =>
+                    prevComments.map((comment) =>
+                        comment._id === commentId
+                            ? { 
+                                ...comment, 
+                                content: updatedComment.content, // Update the content to the new one
+                                updatedAt: updatedComment.updatedAt, // Update the timestamp to reflect the latest change
+                              }
+                            : comment // Leave other comments unchanged
+                    )
+                );
+            } else {
+                // Handle failure if the response status is not ok
+                alert('Failed to edit comment');
+            }
+        } catch (error) {
+            // Handle any network or unexpected errors
+            console.error('Failed to edit comment:', error);
+            alert('An error occurred while editing the comment.');
+        } finally {
+            // Reset the loading state regardless of whether the request succeeded or failed
+            setLoadingState({ type: null, isLoading: false });
+        }
     };
+    
 
     const handleDelete = async (commentId) => {
         const confirmDelete = confirm("Are you sure you want to delete this comment?");
@@ -235,6 +284,7 @@ const CommentCardList = ({ params }) => {
                                         ${isLoadingMoreReplies ? "bg-gray-400 border-0 cursor-not-allowed" : "hover:underline hover:bg-gray-200"}`}
                                     disabled={isLoadingMoreReplies}
                                     onClick={handleSeeMoreReplies}
+                                    //******!!!!DO NOT DELETE !!****
                                     //onClick={() => handleSeeMoreReplies(rootComment._id)} // Use this if you a rerouting.
                                 >
                                     {isLoadingMoreReplies ? 
