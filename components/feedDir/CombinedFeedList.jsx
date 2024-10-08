@@ -1,7 +1,7 @@
 import PromptCard from "@components/promptDir/PromptCard";
 import { useSession } from "next-auth/react";
 import RepostCard from "./RepostCard";
-import { Comment } from "@components/commentsDir";
+import { Comment, CommentCard } from "@components/commentsDir";
 
 const CombinedFeedList = ({ promptData = [], commentData = [], handleTagClick }) => {
   // Session management for user info (used in CommentFeedList)
@@ -61,20 +61,23 @@ const CombinedFeedList = ({ promptData = [], commentData = [], handleTagClick })
       {sortedCombinedData.map((item, index) => (
         <div key={index} className="relative space-y-6 py-8">
           {/* Render based on the type of item */}
-          {item.type === "post" ? (
-            <PromptCard post={item.post} handleTagClick={handleTagClick} />
-          ) : item.type === "repost" && item.post ? (
+          {item.type === "post" ? ( // Render prompts and reposted prompts
+            <PromptCard post={item.post} handleTagClick={handleTagClick} /> //prompts
+          ) : item.type === "repost" && item.post ? ( //reposted prompts
             <RepostCard
               originalPost={item.post}
               repost={item.repost}
               handleTagClick={handleTagClick}
             />
+          // Render comments and reposted comments
           ) : item.type === "comment" ? (
             <div className="prompt_card">
-              <Comment comment={item.comment} user={user} />
+              {/* comments */}
+              <CommentCard comment={item.comment} user={user} />
             </div>
           ) : (
             <div className="prompt_card">
+              {/* reposted comments */}
               <RepostCard
                 cardType={"comment"}
                 originalPost={item.comment}
