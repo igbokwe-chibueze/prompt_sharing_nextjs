@@ -255,6 +255,7 @@ const CommentCardList = ({ params }) => {
                                 onEdit={handleEdit}
                                 onDelete={handleDelete}
                                 user={user}
+                                loadingState={loadingState}
                             />
 
                             {/* Display nested replies for each root comment */}
@@ -269,6 +270,7 @@ const CommentCardList = ({ params }) => {
                                                     onEdit={handleEdit}
                                                     onDelete={handleDelete}
                                                     user={user}
+                                                    loadingState={loadingState}
                                                 />
                                             </div>
                                         </div>

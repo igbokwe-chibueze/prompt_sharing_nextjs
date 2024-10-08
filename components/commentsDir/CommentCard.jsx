@@ -41,8 +41,13 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, loadingState  }
     };
 
     // Function to handle editting
-    const handleEdit = () => {
-        onEdit(comment._id, editContent);
+    const handleEdit = async () => {
+        if (!editContent) return;
+        
+        // Call the onEdit function and pass in comment ID and edi content
+        await onEdit(comment._id, editContent); // Wait for the edit to be processed
+
+        // Close the edit box only after the edit content is successfully submitted
         setShowEditBox(false);
     };
 
@@ -112,8 +117,10 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, loadingState  }
         {isDeleted ? (
                 <p className="italic text-gray-500">{comment.content}</p>
             ): (
-                <>
-                    <div className="flex items-center mb-2 space-x-2 cursor-pointer" onClick={handleProfileClick}>
+                <div className="space-y-2">
+                    <p className="italic text-gray-500">replied.........</p>
+
+                    <div className="flex items-center space-x-2 cursor-pointer" onClick={handleProfileClick}>
                         <Image
                             src={comment.userId.image }
                             alt={`${comment.userId.username }'s profile picture`}
@@ -125,26 +132,29 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, loadingState  }
                     </div>
 
                     {showEditBox ? (
-                        <div className="mt-2">
+                        <div>
                             <textarea
                                 className="w-full p-2 border border-gray-300 rounded-md"
                                 value={editContent}
                                 onChange={(e) => setEditContent(e.target.value)}
                                 placeholder="Edit your comment..."
+                                disabled={loadingState?.isLoading && loadingState.type === 'edit'}
                             />
                             <div className="mt-2 space-x-2">
                                 <button 
-                                    className="px-4 py-2 bg-green-500 hover:bg-green-700 text-white rounded-md" 
+                                    className={`bg-green-500 text-white mt-2 px-4 py-2 rounded-md
+                                        ${loadingState?.isLoading && loadingState.type === 'reply' ? "bg-gray-400 cursor-not-allowed" : "hover:bg-green-700"}`}
                                     onClick={handleEdit}
-                                    //disabled={loadingState.isLoading && loadingState.type === 'edit'}
+                                    disabled={loadingState?.isLoading && loadingState.type === 'edit'}
                                 >
-                                    Save
+                                    {loadingState?.isLoading && loadingState.type === 'edit' ? 'Saving...' : 'Save'}
                                 </button>
 
                                 <button 
-                                    className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-md" 
+                                    //className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-md" 
+                                    className={`bg-gray-500 text-white mt-2 px-4 py-2 rounded-md
+                                        ${loadingState?.isLoading && loadingState.type === 'edit' ? "invisible" : "hover:bg-gray-700"}`}
                                     onClick={handleCancelEdit}
-                                    //disabled={loadingState.isLoading && loadingState.type === 'edit'}
                                 >
                                     Cancel
                                 </button>
@@ -159,7 +169,7 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, loadingState  }
                             {comment.content}
                         </p>
                     )}
-                </>
+                </div>
             )
         }
 
