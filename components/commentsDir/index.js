@@ -3,6 +3,7 @@ import CommentBtn from "./CommentBtn"
 import CommentCard from "./CommentCard"
 import CommentCardList from "./CommentCardList"
 import CommentList from "./CommentList"
+import PromptCommentList from "./PromptCommentList"
 
 
 
@@ -11,5 +12,6 @@ export {
     CommentList,
     Comment,
     CommentCard,
-    CommentCardList
+    CommentCardList,
+    PromptCommentList
 }

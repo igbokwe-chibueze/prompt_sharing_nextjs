@@ -8,8 +8,8 @@ import Copy from "../Copy";
 import Sharing from "../sharing/Sharing";
 import PostActivity from "../PostActivity";
 import { useState } from "react";
-import CommentList from "../commentsDir/CommentList";
 import { BookmarkButton, CommentButton, LikeButton, RepostButton } from "../engagements";
+import { PromptCommentList } from "@components/commentsDir";
 
 /**
  * PromptCard Component
@@ -239,7 +239,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
 
 
       {/* Comment List */}
-      <CommentList post={post} promptIsDeleted={isDeleted} />
+      <PromptCommentList entity={post} user={user} entityType={"prompt"} />
     </div>
   );
 };

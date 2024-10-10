@@ -34,41 +34,68 @@ export const GET = async (request, { params }) => {
                 status: 200,
             });
 
-
+        // Handle requests to fetch actual comments
         } else {
-            // Handle requests to fetch actual comments
-            const comment = await Comment.findById(objectId).populate("userId");
+            if (prompt) { // This is called on a prompt
 
-            if (!comment)
-                return new Response("Comment Not Found", { status: 404 });
+                const rootComments = await fetchRootComments(objectId, prompt, {
+                    sort: { createdAt: -1 },
+                    populate: "userId",
+                    limit: limit,
+                });
 
-            const rootComments = await fetchRootComments(objectId, prompt, {
-                sort: { createdAt: -1 },
-                populate: "userId",
-                limit: limit,
-            });  
+                const populatedComments = [];
 
-            const populatedComments = [];
+                for (let comment of rootComments) {
+                    const populatedComment = comment.toObject();
+                    const { replies, totalReplyCount } = await populateReplies(populatedComment._id, replyLimit);
+                    populatedComment.replies = replies;
+                    populatedComment.totalReplyCount = totalReplyCount; // Add the total reply count to the comment object
+                    populatedComments.push(populatedComment);
+                }
 
-            //******!!!!DO NOT DELETE !!****
-            // for (let comment of rootComments) {
-            //     const populatedComment = comment.toObject();
-            //     populatedComment.replies = await populateReplies(populatedComment._id, replyLimit );
-            //     populatedComments.push(populatedComment);
-            // }
+                return new Response(JSON.stringify({ populatedComments }), {
+                    status: 200,
+                });
 
-            // This is not needed if nested replies navigate to the comment details page of its root comment instead use the commented out code above.
-            for (let comment of rootComments) {
-                const populatedComment = comment.toObject();
-                const { replies, totalReplyCount } = await populateReplies(populatedComment._id, replyLimit);
-                populatedComment.replies = replies;
-                populatedComment.totalReplyCount = totalReplyCount; // Add the total reply count to the comment object
-                populatedComments.push(populatedComment);
+            } else { // This is called on a comment.
+                const comment = await Comment.findById(objectId).populate("userId");
+
+                if (!comment)
+                    return new Response("Comment Not Found", { status: 404 });
+
+                const rootComments = await fetchRootComments(objectId, prompt, {
+                    sort: { createdAt: -1 },
+                    populate: "userId",
+                    limit: limit,
+                });  
+
+                const populatedComments = [];
+
+                //******!!!!DO NOT DELETE !!****
+                //This is used if "See More" btn redirects to the root comment details page.
+                // Returns a fixed numeber of replies(replyLimit) to the root comment.
+                // for (let comment of rootComments) {
+                //     const populatedComment = comment.toObject();
+                //     populatedComment.replies = await populateReplies(populatedComment._id, replyLimit );
+                //     populatedComments.push(populatedComment);
+                // }
+
+                // This is not needed if nested replies navigate to the comment details page of its root comment instead use the commented out code above.
+                // Returns not just the replies to the root comments but also the count. 
+                //This is needed for the "See More" btn to be able to load additional replies.
+                for (let comment of rootComments) {
+                    const populatedComment = comment.toObject();
+                    const { replies, totalReplyCount } = await populateReplies(populatedComment._id, replyLimit);
+                    populatedComment.replies = replies;
+                    populatedComment.totalReplyCount = totalReplyCount; // Add the total reply count to the comment object
+                    populatedComments.push(populatedComment);
+                }
+
+                return new Response(JSON.stringify({ comment, populatedComments }), {
+                    status: 200,
+                });
             }
-
-            return new Response(JSON.stringify({ comment, populatedComments }), {
-                status: 200,
-            });
         }
     } catch (error) {
         return new Response("Internal Server Error", { status: 500 });
@@ -91,7 +118,7 @@ const populateReplies = async (commentId, replyLimit) => {
 // Helper function to fetch root-level comments based on entity type
 const fetchRootComments = async (objectId, isPrompt, options = {}) => {
     const query = isPrompt
-        ? { postId: objectId, parentCommentId: null }
+        ? { objectId, parentCommentId: null }
         : { parentCommentId: objectId };
 
     // Apply optional sorting (e.g., by creation date) if specified in `options.sort`, default to no sorting.

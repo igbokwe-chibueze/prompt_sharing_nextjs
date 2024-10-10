@@ -1,7 +1,7 @@
 import PromptCard from "@components/promptDir/PromptCard";
 import { useSession } from "next-auth/react";
 import RepostCard from "./RepostCard";
-import { Comment, CommentCard } from "@components/commentsDir";
+import { CommentCard } from "@components/commentsDir";
 
 const CombinedFeedList = ({ promptData = [], commentData = [], handleTagClick }) => {
   // Session management for user info (used in CommentFeedList)
