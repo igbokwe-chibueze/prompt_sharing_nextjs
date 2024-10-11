@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Rating from "../Rating";
 import Copy from "../Copy";
 import Sharing from "../sharing/Sharing";
 import PostActivity from "../PostActivity";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BookmarkButton, CommentButton, LikeButton, RepostButton } from "../engagements";
 import { PromptCommentList } from "@components/commentsDir";
 
@@ -21,13 +21,53 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
   const { data: session } = useSession(); // Access session data for authentication
   const pathName = usePathname(); // Get the current route path
   const router = useRouter(); // Next.js router for navigation
+  const searchParams = useSearchParams()
 
   const user = session?.user; // Destructure user information from session
+
+  const [showReplyBox, setShowReplyBox] = useState(true);
+  const [newComment, setNewComment] = useState('');
+
+  const [isCommenting, setIsCommenting] = useState();
 
   const [profileClickCount, setProfileClickCount] = useState(post.profileClickCount || 0);
   const [promptClickCount, setPromptClickCount] = useState(post.promptClickCount || 0);
 
   const [totalEngagements, setTotalEngagements] = useState(0);
+
+  const replyBoxRef = useRef(null); // Create a ref for the reply textarea
+
+  useEffect(() => {
+    // Open reply box and focus on it if the query param `reply=true` is present
+    if (searchParams.get('reply') === 'true') {
+      setShowReplyBox(true); // Open the reply box if not already open
+      if (replyBoxRef.current) {
+        replyBoxRef.current.focus(); // Automatically focus the reply box
+      }
+    }
+  }, [searchParams]);
+
+  const handleNewComment = async () => {
+    if (!newComment.trim()) return; // Prevent empty comments from being submitted
+
+    setIsCommenting(true)
+
+    try {
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId: post._id, userId: user.id, content: newComment }),
+      });
+
+      if (res.ok) {
+        setNewComment(''); // Clear the comment input field
+        setIsCommenting(false)
+      }
+    } catch (error) {
+      setIsCommenting(false)
+      console.error('Failed to post comment:', error);
+    }
+  };
 
   // Handles profile click - shows login popup if not logged in
   const handleProfileClick = async () => {
@@ -221,19 +261,41 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
           {session?.user.id === post.creator._id && pathName !== "/" && (
             <div className="mt-5 flex-center gap-4 border-t border-gray-100 pt-3">
               <p
-                className="font-inter text-sm green_gradient cursor-pointer"
+                className="font-inter text-sm green_gradient cursor-pointer hover:text-purple-700"
                 onClick={handleEdit}
               >
                 Edit
               </p>
               <p
-                className="font-inter text-sm orange_gradient cursor-pointer"
+                className="font-inter text-sm orange_gradient cursor-pointer hover:text-red-700"
                 onClick={handleDelete}
               >
                 Delete
               </p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Show the reply box if on comment details page, or if manually toggled */}
+      {showReplyBox && pathName === `/promptDetails/${post._id}` && (
+        <div className="mt-2">
+          <textarea
+            ref={replyBoxRef} 
+            className="w-full p-2 border border-gray-300 rounded-md"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="Write a reply..."
+            disabled={isCommenting} // Disable while loading
+          />
+          <button
+            className={`bg-blue-500 text-white mt-2 px-4 py-2 rounded-md
+                ${isCommenting ? "bg-gray-400 cursor-not-allowed" : "hover:bg-blue-700"}`}
+            onClick={handleNewComment}
+            disabled={isCommenting} // Disable while loading
+          >
+            {isCommenting ? 'Submitting...' : 'Submit'}
+          </button>
         </div>
       )}
 

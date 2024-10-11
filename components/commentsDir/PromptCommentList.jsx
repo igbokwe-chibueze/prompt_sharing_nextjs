@@ -48,7 +48,7 @@ const PromptCommentList = ({ entity, user, entityType }) => {
         };
 
         fetchComment();
-    }, []);
+    }, [commentId, rootComments]);
 
     const handleReply = async (commentId, replyContent) => {
         if (!replyContent) return;
@@ -281,7 +281,27 @@ const PromptCommentList = ({ entity, user, entityType }) => {
             </div>
         ) : (
             <div className="text-center">
-            <p className="text-red-500">Comment not found.</p>
+                <p className="text-red-500">Comment not found.</p>
+            </div>
+        )}
+
+        {/* See More Btn */}
+        {rootComments?.length < rootCommentsCount && (
+            <div className="text-center mt-2">
+                <button
+                    className={`text-white px-4 py-2 rounded-md border border-black
+                        ${isLoadingMoreComments ? "bg-gray-400 border-0 cursor-not-allowed" : "bg-black hover:bg-transparent hover:text-black"}`}
+                    onClick={handleSeeMoreComments}
+                    disabled={isLoadingMoreComments}
+                >
+                    {isLoadingMoreComments ? 
+                        <span className="flex items-center space-x-2">
+                            <LoadingIcon className={"animate-spin fill-white w-4 h-4"} />
+                            <p>Loading...</p>
+                        </span> : 
+                        `See ${rootCommentsCount - rootComments.length} More Comments`
+                    }
+                </button>
             </div>
         )}
     </div>

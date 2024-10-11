@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
-import Link from "next/link";
+import { useRouter } from 'next/navigation';
 
 const Form = ({ type, post, setPost, submitting, handleSubmit }) => {
+
+  const router = useRouter();
+
   // Initialize tags state with post.tags if available, otherwise start with one empty tag
   const [tags, setTags] = useState(post.tags.length > 0 ? post.tags : ['']);
 
@@ -103,21 +106,25 @@ const Form = ({ type, post, setPost, submitting, handleSubmit }) => {
           <button
             type='button'
             onClick={addTagField}
-            className='px-5 py-1.5 text-sm bg-primary-orange rounded-full text-white w-fit'
+            className='px-5 py-1.5 text-sm bg-primary-orange hover:bg-orange-800 rounded-full text-white w-fit'
           >
            + Add More Tags
           </button>
         </div>
 
         <div className='flex-end mx-3 mb-5 gap-4'>
-          <Link href='/' className='text-gray-500 text-sm'>
+          <button
+            type='button'
+            onClick={() => router.back()} // Navigate to the previous page
+            className='px-5 py-1.5 rounded-full text-gray-500 text-sm hover:bg-purple-700 hover:text-white'
+          >
             Cancel
-          </Link>
+          </button>
 
           <button
             type='submit'
             disabled={submitting}
-            className='px-5 py-1.5 text-sm bg-green-700 rounded-full text-white'
+            className='px-5 py-1.5 text-sm bg-green-700 hover:bg-green-900 rounded-full text-white'
           >
             {submitting ? `${type}ing...` : type}
           </button>

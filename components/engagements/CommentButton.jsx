@@ -30,11 +30,20 @@ const CommentButton = ({entity, entityType,}) => {
 
     const handleCommentButtonClick = () => {
         // Redirect to comment details page with query param to open and focus the reply box
-        router.push(`/commentDetails/${objectId}?reply=true`);
+        if (entityType === "prompt") {
+            // Redirect to prompt details page if entity type is "prompt"
+            router.push(`/promptDetails/${objectId}?reply=true`);
+        } else if (entityType === "comment") {
+            // Redirect to comment details page if entity type is "comment"
+            router.push(`/commentDetails/${objectId}?reply=true`);
+        }
     };
 
   return (
-    <div className={`flex items-center ${pathname === `/commentDetails/${objectId}` ? 'pointer-events-none' : ''}`}>
+    <div 
+        className={`flex items-center ${pathname.includes(objectId) ? 'pointer-events-none' : ''}`}
+        onClick={handleCommentButtonClick}
+    >
         <div
             className="p-2 rounded-full transition-colors duration-200 text-gray-800 hover:bg-gray-300 cursor-pointer"
         >
