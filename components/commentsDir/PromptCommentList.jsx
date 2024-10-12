@@ -33,10 +33,10 @@ const PromptCommentList = ({ entity, user, entityType }) => {
                 setRootComments(data.populatedComments); // rootComments includes replies
 
                 // Fetch the total count of comments and replies
-                //const responseCount = await fetch(`/api/comments/commentDetails/${commentId}?count=true`);
-                //const countData = await responseCount.json();
+                const responseCount = await fetch(`/api/comments/commentDetails/${commentId}?count=true&entityType=${entityType}`);
+                const countData = await responseCount.json();
 
-                //setTotalRootCommentsCount(countData.totalRootCommentCount); // Count of root comments (not replies)
+                setTotalRootCommentsCount(countData.totalRootCommentCount); // Count of root comments (not replies)
             } catch (error) {
                 console.error("Failed to fetch comment details:", error);
                 setLoading(false);
@@ -257,7 +257,7 @@ const PromptCommentList = ({ entity, user, entityType }) => {
                         )}
 
                         {/* See More Replies Button */}
-                        {/* {rootComment.replies?.length < rootComment.totalReplyCount && (
+                        {rootComment.replies?.length < rootComment.totalReplyCount && (
                             <button
                                 //className="text-blue-700 mt-2 p-2 rounded-md hover:underline hover:bg-gray-200"
                                 className={`text-blue-700 mt-2 p-2 rounded-md
@@ -275,7 +275,7 @@ const PromptCommentList = ({ entity, user, entityType }) => {
                                     `See ${rootComment.totalReplyCount - rootComment.replies?.length} More Comments`
                                 }
                             </button>
-                        )} */}
+                        )}
                     </div>
                 ))}
             </div>

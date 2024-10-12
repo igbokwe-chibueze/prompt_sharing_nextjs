@@ -1,17 +1,15 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LoadingIcon } from "@constants/icons";
 import { CommentCard } from "@components/commentsDir";
 
-const CommentCardList = ({ params }) => {
+const CommentCardList = ({ params, entityType }) => {
 
     const { data: session } = useSession();
     const user = session?.user;
 
-    const router = useRouter();
     const [comment, setComment] = useState(null);
 
     const [rootComments, setRootComments] = useState(null);
@@ -38,13 +36,13 @@ const CommentCardList = ({ params }) => {
             if (rootComments === null) setLoading(true);
 
             try {
-                const res = await fetch(`/api/comments/commentDetails/${commentId}?commentsLimit=${commentsLimit}&repliesLimit=${repliesLimit}`);
+                const res = await fetch(`/api/comments/commentDetails/${commentId}?commentsLimit=${commentsLimit}&repliesLimit=${repliesLimit}&entityType=${entityType}`);
                 const data = await res.json();
                 setComment(data.comment);
                 setRootComments(data.populatedComments); // rootComments includes replies
 
                 // Fetch the total count of comments and replies
-                const responseCount = await fetch(`/api/comments/commentDetails/${commentId}?count=true`);
+                const responseCount = await fetch(`/api/comments/commentDetails/${commentId}?count=true&entityType=${entityType}`);
                 const countData = await responseCount.json();
 
                 setTotalRootCommentsCount(countData.totalRootCommentCount); // Count of root comments (not replies)

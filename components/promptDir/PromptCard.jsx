@@ -277,7 +277,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
         </div>
       )}
 
-      {/* Show the reply box if on comment details page, or if manually toggled */}
+      {/* Show the reply box if on prompt details page, or if manually toggled */}
       {showReplyBox && pathName === `/promptDetails/${post._id}` && (
         <div className="mt-2">
           <textarea
@@ -301,7 +301,9 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
 
 
       {/* Comment List */}
-      <PromptCommentList entity={post} user={user} entityType={"prompt"} />
+      {pathName === `/promptDetails/${post._id}` && (
+        <PromptCommentList entity={post} user={user} entityType={"prompt"} />
+      )}
     </div>
   );
 };

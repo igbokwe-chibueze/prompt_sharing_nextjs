@@ -104,7 +104,7 @@ export const GET = async (request, { params }) => {
 
 const populateReplies = async (commentId, replyLimit) => {
     const replies = await Comment.find({ parentCommentId: commentId })
-        .sort({ createdAt: 1 })
+        .sort({ createdAt: -1 })
         .populate('userId', 'username image')
         .limit(replyLimit) // set how many replies are allowed to show.
 

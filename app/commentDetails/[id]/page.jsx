@@ -13,7 +13,7 @@ const CommentDetails = ({ params }) => {
       </h1>
 
       <Suspense fallback={<Loading/>}>
-        <CommentCardList params={params}/>
+        <CommentCardList params={params} entityType={"comment"}/>
       </Suspense>
 
 
