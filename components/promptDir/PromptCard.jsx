@@ -301,7 +301,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
 
 
       {/* Comment List */}
-      {pathName === `/promptDetails/${post._id}` && (
+      {pathName === `/promptDetails/${post._id}` && ( // Only display comments in prompt detail page.
         <PromptCommentList entity={post} user={user} entityType={"prompt"} />
       )}
     </div>

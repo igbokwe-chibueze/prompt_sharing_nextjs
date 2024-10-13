@@ -59,7 +59,15 @@ export const GET = async (request, { params }) => {
                 });
 
             } else { // This is called on a comment.
-                const comment = await Comment.findById(objectId).populate("userId");
+                const comment = await Comment.findById(objectId)
+                    .populate("userId")
+                    .populate({
+                        path: 'parentCommentId', // Populate the parent comment (the comment that this reply is responding to)
+                        populate: {
+                            path: 'userId', // Populate the user who made the parent comment
+                            select: 'username image' // Only select the fields you want to display
+                        }
+                    });
 
                 if (!comment)
                     return new Response("Comment Not Found", { status: 404 });
@@ -106,6 +114,13 @@ const populateReplies = async (commentId, replyLimit) => {
     const replies = await Comment.find({ parentCommentId: commentId })
         .sort({ createdAt: -1 })
         .populate('userId', 'username image')
+        .populate({
+            path: 'parentCommentId', // Populate the parent comment (the comment that this reply is responding to)
+            populate: {
+                path: 'userId', // Populate the user who made the parent comment
+                select: 'username image' // Only select the fields you want to display
+            }
+        })
         .limit(replyLimit) // set how many replies are allowed to show.
 
     // Fetch the total count of replies for the given commentId
@@ -118,14 +133,21 @@ const populateReplies = async (commentId, replyLimit) => {
 // Helper function to fetch root-level comments based on entity type
 const fetchRootComments = async (objectId, isPrompt, options = {}) => {
     const query = isPrompt
-        ? { objectId, parentCommentId: null }
-        : { parentCommentId: objectId };
+        ? { objectId, parentCommentId: null } // Its used on a prompt.
+        : { parentCommentId: objectId }; // Its used on a comment.
 
     // Apply optional sorting (e.g., by creation date) if specified in `options.sort`, default to no sorting.
     // Populate referenced fields (e.g., user details) if specified in `options.populate`, otherwise return raw ObjectIds.
     const baseQuery = Comment.find(query)
         .sort(options.sort || {})
-        .populate(options.populate || "");
+        .populate(options.populate || "")
+        .populate({
+            path: 'parentCommentId', // Populate the parent comment (the comment that this reply is responding to)
+            populate: {
+                path: 'userId', // Populate the user who made the parent comment
+                select: 'username image' // Only select the fields you want to display
+            }
+        })
 
     // If a limit is specified, apply it
     if (options.limit) {

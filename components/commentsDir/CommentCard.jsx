@@ -70,6 +70,14 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, loadingState  }
         }
     };
 
+    const handleRepliedProfileClick = async () => {
+        if (comment.parentCommentId?.userId._id === user.id) {
+            router.push("/profile");
+        } else {
+            router.push(`/profile/${comment.parentCommentId?.userId._id}?name=${comment.parentCommentId?.userId.username}`);
+        }
+    };
+
     // Handles commentt click - shows login popup if not logged in
     const handleCommentClick = async () => {
         if (!user) {
@@ -118,7 +126,11 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, loadingState  }
                 <p className="italic text-gray-500">{comment.content}</p>
             ): (
                 <div className="space-y-2">
-                    <p className="italic text-gray-500">replied.........</p>
+                    {/* Displays who is being replied to */}
+                    <p className="italic text-gray-500 group cursor-pointer" onClick={handleRepliedProfileClick}>
+                        replied... 
+                        <span className = "text-blue-700 group-hover:underline">{comment.parentCommentId?.userId.username}</span>
+                    </p>
 
                     <div className="flex items-center space-x-2 cursor-pointer" onClick={handleProfileClick}>
                         <Image

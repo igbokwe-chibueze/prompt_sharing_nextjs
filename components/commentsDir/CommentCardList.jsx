@@ -278,6 +278,7 @@ const CommentCardList = ({ params, entityType }) => {
 
                             {/* See More Replies Button */}
                             {rootComment.replies?.length < rootComment.totalReplyCount && (
+                                // Is the number of shown replies presently, less than the total number of all replies to the comment.
                                 <button
                                     //className="text-blue-700 mt-2 p-2 rounded-md hover:underline hover:bg-gray-200"
                                     className={`text-blue-700 mt-2 p-2 rounded-md

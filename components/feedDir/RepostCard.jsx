@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import PromptCard from "../promptDir/PromptCard";
 import { RepeatIcon } from "@constants/icons";
-import { Comment } from "../commentsDir";
+import { CommentCard } from "../commentsDir";
 
 const RepostCard = ({ repost, originalPost, cardType = "prompt", handleTagClick }) => {
     const { data: session } = useSession(); // Access session data for authentication
@@ -32,7 +32,7 @@ const RepostCard = ({ repost, originalPost, cardType = "prompt", handleTagClick 
         case "prompt":
           return <PromptCard post={originalPost} handleTagClick={handleTagClick} />;
         case "comment":
-          return <Comment comment={originalPost} user={session?.user} />;
+          return <CommentCard comment={originalPost} user={session?.user} />;
         default:
           return null;
       }
