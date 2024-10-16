@@ -17,7 +17,7 @@ const CommentCardList = ({ params, entityType }) => {
     const [commentsLimit, setCommentsLimit] = useState(2); // Initial limit for comments
     const [isLoadingMoreComments, setIsLoadingMoreComments] = useState(false); // Track loading state for "See More" button on root comments
 
-    const [promptDetails, setPromptDetails] = useState(null);
+    const [promptDetails, setPromptDetails] = useState(null); // The prompt the comments are attached to.
 
 
     const [repliesLimit, setRepliesLimit] = useState(1); // Fixed limit for nested replies
@@ -25,9 +25,14 @@ const CommentCardList = ({ params, entityType }) => {
 
     const [loadingState, setLoadingState] = useState({ type: null, isLoading: false }); // Unified loading state
     const [loading, setLoading] = useState(true);
-    
 
-    const commentId = params?.id;
+    let commentId
+
+    if (entityType == "comment") {
+        commentId = params?.id;
+    } else {
+        commentId = params._id;
+    }
 
     useEffect(() => {
 

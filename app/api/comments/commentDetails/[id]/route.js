@@ -136,7 +136,7 @@ const populateReplies = async (commentId, replyLimit) => {
 // Helper function to fetch root-level comments based on entity type
 const fetchRootComments = async (objectId, isPrompt, options = {}) => {
     const query = isPrompt
-        ? { objectId, parentCommentId: null } // Its used on a prompt.
+        ? { postId: objectId, parentCommentId: null } // Its used on a prompt.
         : { parentCommentId: objectId }; // Its used on a comment.
 
     // Apply optional sorting (e.g., by creation date) if specified in `options.sort`, default to no sorting.
