@@ -1,4 +1,5 @@
 import Comment from "@models/comment";
+import Prompt from "@models/prompt";
 import { connectToDB } from "@utils/database";
 
 // GET request handler for fetching comments or counts
@@ -67,10 +68,12 @@ export const GET = async (request, { params }) => {
                             path: 'userId', // Populate the user who made the parent comment
                             select: 'username image' // Only select the fields you want to display
                         }
-                    });
+                    })
 
                 if (!comment)
                     return new Response("Comment Not Found", { status: 404 });
+
+                const promptDetails = await Prompt.findById(comment.postId).populate("creator") // The prompt the comments are attached to.
 
                 const rootComments = await fetchRootComments(objectId, prompt, {
                     sort: { createdAt: -1 },
@@ -100,7 +103,7 @@ export const GET = async (request, { params }) => {
                     populatedComments.push(populatedComment);
                 }
 
-                return new Response(JSON.stringify({ comment, populatedComments }), {
+                return new Response(JSON.stringify({ comment, populatedComments, promptDetails }), {
                     status: 200,
                 });
             }

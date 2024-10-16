@@ -17,6 +17,8 @@ const CommentCardList = ({ params, entityType }) => {
     const [commentsLimit, setCommentsLimit] = useState(2); // Initial limit for comments
     const [isLoadingMoreComments, setIsLoadingMoreComments] = useState(false); // Track loading state for "See More" button on root comments
 
+    const [promptDetails, setPromptDetails] = useState(null);
+
 
     const [repliesLimit, setRepliesLimit] = useState(1); // Fixed limit for nested replies
     const [isLoadingMoreReplies, setIsLoadingMoreReplies] = useState(false); // Track loading state for "See More" button on nested replies
@@ -38,7 +40,13 @@ const CommentCardList = ({ params, entityType }) => {
             try {
                 const res = await fetch(`/api/comments/commentDetails/${commentId}?commentsLimit=${commentsLimit}&repliesLimit=${repliesLimit}&entityType=${entityType}`);
                 const data = await res.json();
-                setComment(data.comment);
+
+                // Only set comment when entity is comment.
+                // This is beause in the comment details page, the api above returns the head comment, something that is not neccessary when using this component on a Prompt.
+                if (entityType == "comment") {
+                    setComment(data.comment);
+                    setPromptDetails(data.promptDetails) // get the details of the prompt being replied too.
+                }
                 setRootComments(data.populatedComments); // rootComments includes replies
 
                 // Fetch the total count of comments and replies
@@ -226,36 +234,28 @@ const CommentCardList = ({ params, entityType }) => {
         setRepliesLimit((prevLimit) => prevLimit + 1); // Increase the replies limit to fetch more replies
     };
 
-  return (
-    <div className="container mx-auto p-4">
-        {loading ? (
-            <div className="text-center">
-                <LoadingIcon className="animate-spin w-6 h-6 mx-auto text-black" />
-                <p>Loading comments...</p>
-            </div>
-        ) : comment ? (
-                <div className="border p-4 bg-gray-100 rounded-md">
-                    <CommentCard 
-                        comment={comment}
-                        onReply={handleReply}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                        user={user}
-                        loadingState={loadingState} // Pass the loading state as a prop
-                    />
-
-                    {/* Display root comments and their replies */}
+    return (
+        <div className="container mx-auto">
+            {loading ? (
+                <div className="text-center">
+                    <LoadingIcon className="animate-spin w-6 h-6 mx-auto text-black" />
+                    <p>Loading comments...</p>
+                </div>
+            ) : entityType === "prompt" ? (
+                <div className="bg-gray-100 rounded-md">
+                    {/* Only display root comments for "prompt" entity type */}
                     {rootComments?.map((rootComment) => (
-                        <div className="border-t-2 pl-10" key={rootComment._id}>
+                        <div className="border-t-2" key={rootComment._id}>
                             <CommentCard 
                                 comment={rootComment}
                                 onReply={handleReply}
                                 onEdit={handleEdit}
                                 onDelete={handleDelete}
                                 user={user}
+                                promptDetails={params}
                                 loadingState={loadingState}
                             />
-
+    
                             {/* Display nested replies for each root comment */}
                             {rootComment.replies?.length > 0 && (
                                 <div className="pl-6 mt-2 space-y-4">
@@ -268,6 +268,7 @@ const CommentCardList = ({ params, entityType }) => {
                                                     onEdit={handleEdit}
                                                     onDelete={handleDelete}
                                                     user={user}
+                                                    promptDetails={params}
                                                     loadingState={loadingState}
                                                 />
                                             </div>
@@ -275,26 +276,91 @@ const CommentCardList = ({ params, entityType }) => {
                                     ))}
                                 </div>
                             )}
-
+    
                             {/* See More Replies Button */}
                             {rootComment.replies?.length < rootComment.totalReplyCount && (
-                                // Is the number of shown replies presently, less than the total number of all replies to the comment.
                                 <button
-                                    //className="text-blue-700 mt-2 p-2 rounded-md hover:underline hover:bg-gray-200"
                                     className={`text-blue-700 mt-2 p-2 rounded-md
                                         ${isLoadingMoreReplies ? "bg-gray-400 border-0 cursor-not-allowed" : "hover:underline hover:bg-gray-200"}`}
                                     disabled={isLoadingMoreReplies}
                                     onClick={handleSeeMoreReplies}
-                                    //******!!!!DO NOT DELETE !!****
-                                    //onClick={() => handleSeeMoreReplies(rootComment._id)} // Use this if you a rerouting.
                                 >
-                                    {isLoadingMoreReplies ? 
+                                    {isLoadingMoreReplies ? (
                                         <span className="flex items-center space-x-2">
                                             <LoadingIcon className={"animate-spin fill-white w-4 h-4"} />
                                             <p>Loading...</p>
-                                        </span> : 
+                                        </span>
+                                    ) : (
                                         `See ${rootComment.totalReplyCount - rootComment.replies?.length} More Comments`
-                                    }
+                                    )}
+                                </button>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            ) : comment ? (
+                <div className="border p-4 bg-gray-100 rounded-md">
+                    {/* Display the main comment and root comments */}
+                    <CommentCard 
+                        comment={comment}
+                        onReply={handleReply}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        user={user}
+                        promptDetails={promptDetails}
+                        loadingState={loadingState}
+                    />
+    
+                    {/* Display root comments and their replies */}
+                    {rootComments?.map((rootComment) => (
+                        <div className="border-t-2 pl-10" key={rootComment._id}>
+                            <CommentCard 
+                                comment={rootComment}
+                                onReply={handleReply}
+                                onEdit={handleEdit}
+                                onDelete={handleDelete}
+                                user={user}
+                                promptDetails={promptDetails}
+                                loadingState={loadingState}
+                            />
+    
+                            {/* Display nested replies */}
+                            {rootComment.replies?.length > 0 && (
+                                <div className="pl-6 mt-2 space-y-4">
+                                    {rootComment.replies.map((reply) => (
+                                        <div key={reply._id} className="border-l-2 pl-4">
+                                            <div className="border-t-2 border-dotted">
+                                                <CommentCard 
+                                                    comment={reply}
+                                                    onReply={handleReply}
+                                                    onEdit={handleEdit}
+                                                    onDelete={handleDelete}
+                                                    user={user}
+                                                    promptDetails={promptDetails}
+                                                    loadingState={loadingState}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+    
+                            {/* See More Replies Button */}
+                            {rootComment.replies?.length < rootComment.totalReplyCount && (
+                                <button
+                                    className={`text-blue-700 mt-2 p-2 rounded-md
+                                        ${isLoadingMoreReplies ? "bg-gray-400 border-0 cursor-not-allowed" : "hover:underline hover:bg-gray-200"}`}
+                                    disabled={isLoadingMoreReplies}
+                                    onClick={handleSeeMoreReplies}
+                                >
+                                    {isLoadingMoreReplies ? (
+                                        <span className="flex items-center space-x-2">
+                                            <LoadingIcon className={"animate-spin fill-white w-4 h-4"} />
+                                            <p>Loading...</p>
+                                        </span>
+                                    ) : (
+                                        `See ${rootComment.totalReplyCount - rootComment.replies?.length} More Comments`
+                                    )}
                                 </button>
                             )}
                         </div>
@@ -302,32 +368,33 @@ const CommentCardList = ({ params, entityType }) => {
                 </div>
             ) : (
                 <div className="text-center">
-                <p className="text-red-500">Comment not found.</p>
+                    <p className="text-red-500">Comment not found.</p>
                 </div>
             )}
-
-        {/* See More Btn */}
-        {rootComments?.length < rootCommentsCount && (
-            <div className="text-center mt-2">
-                <button
-                    className={`text-white px-4 py-2 rounded-md border border-black
-                        ${isLoadingMoreComments ? "bg-gray-400 border-0 cursor-not-allowed" : "bg-black hover:bg-transparent hover:text-black"}`}
-                    onClick={handleSeeMoreComments}
-                    disabled={isLoadingMoreComments}
-                >
-                    {isLoadingMoreComments ? 
-                        <span className="flex items-center space-x-2">
-                            <LoadingIcon className={"animate-spin fill-white w-4 h-4"} />
-                            <p>Loading...</p>
-                        </span> : 
-                        `See ${rootCommentsCount - rootComments.length} More Comments`
-                    }
-                </button>
-            </div>
-        )}
-
-    </div>
-  )
+    
+            {/* See More Comments Button */}
+            {rootComments?.length < rootCommentsCount && (
+                <div className="text-center mt-2">
+                    <button
+                        className={`text-white px-4 py-2 rounded-md border border-black
+                            ${isLoadingMoreComments ? "bg-gray-400 border-0 cursor-not-allowed" : "bg-black hover:bg-transparent hover:text-black"}`}
+                        onClick={handleSeeMoreComments}
+                        disabled={isLoadingMoreComments}
+                    >
+                        {isLoadingMoreComments ? (
+                            <span className="flex items-center space-x-2">
+                                <LoadingIcon className={"animate-spin fill-white w-4 h-4"} />
+                                <p>Loading...</p>
+                            </span>
+                        ) : (
+                            `See ${rootCommentsCount - rootComments.length} More Comments`
+                        )}
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+    
 }
 
 export default CommentCardList

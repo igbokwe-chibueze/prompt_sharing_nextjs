@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { BookmarkButton, CommentButton, LikeButton, RepostButton } from '@components/engagements';
 import Sharing from '@components/sharing/Sharing';
 
-const CommentCard = ({ comment, onReply, onEdit, onDelete, user, loadingState  }) => {
+const CommentCard = ({ comment, onReply, onEdit, onDelete, user, promptDetails, loadingState  }) => {
 
     const pathName = usePathname(); // Get the current route path
     const router = useRouter();
@@ -18,6 +18,10 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, loadingState  }
     const [editContent, setEditContent] = useState(comment.content);
 
     const replyBoxRef = useRef(null); // Create a ref for the reply textarea
+
+    const commenterDetails = comment.userId
+    const rootCommentCreator = comment.parentCommentId?.userId
+    const promptCreatorDetails = promptDetails?.creator
 
     useEffect(() => {
         // Open reply box and focus on it if the query param `reply=true` is present
@@ -62,21 +66,14 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, loadingState  }
         onDelete(comment._id);
     };
 
-    const handleProfileClick = async () => {
-        if (comment.userId._id === user.id) {
+    const handleProfileRedirect = (details) => {
+        if (details._id === user.id) {
             router.push("/profile");
         } else {
-            router.push(`/profile/${comment.userId._id}?name=${comment.userId.username}`);
+            router.push(`/profile/${details._id}?name=${details.username}`);
         }
     };
 
-    const handleRepliedProfileClick = async () => {
-        if (comment.parentCommentId?.userId._id === user.id) {
-            router.push("/profile");
-        } else {
-            router.push(`/profile/${comment.parentCommentId?.userId._id}?name=${comment.parentCommentId?.userId.username}`);
-        }
-    };
 
     // Handles commentt click - shows login popup if not logged in
     const handleCommentClick = async () => {
@@ -127,20 +124,38 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, loadingState  }
             ): (
                 <div className="space-y-2">
                     {/* Displays who is being replied to */}
-                    <p className="italic text-gray-500 group cursor-pointer" onClick={handleRepliedProfileClick}>
+                    <p className=" flex items-center italic text-gray-500 space-x-2">
                         replied... 
-                        <span className = "text-blue-700 group-hover:underline">{comment.parentCommentId?.userId.username}</span>
+                        {rootCommentCreator ? (
+                            <span 
+                                className = "text-blue-700 cursor-pointer hover:underline"
+                                onClick={() => handleProfileRedirect(rootCommentCreator)}
+                            > 
+                                {rootCommentCreator.username} and 
+                            </span>
+                        ) : ""}
+
+                        {promptCreatorDetails ? (
+                            <span 
+                                className = "text-blue-700 cursor-pointer hover:underline" 
+                                onClick={() => handleProfileRedirect(promptCreatorDetails)}
+                            > 
+                                {promptCreatorDetails.username}
+                            </span>
+                        ) : ""}
                     </p>
 
-                    <div className="flex items-center space-x-2 cursor-pointer" onClick={handleProfileClick}>
+                    <div className="flex items-center space-x-2 cursor-pointer" 
+                        onClick={() => handleProfileRedirect(commenterDetails)}
+                    >
                         <Image
-                            src={comment.userId.image }
-                            alt={`${comment.userId.username }'s profile picture`}
+                            src={commenterDetails.image }
+                            alt={`${commenterDetails.username }'s profile picture`}
                             width={40}
                             height={40}
                             className="rounded-full object-contain"
                         />
-                        <p className="font-bold">{comment.userId.username || userDetails?.userName}</p>
+                        <p className="font-bold">{commenterDetails.username}</p>
                     </div>
 
                     {showEditBox ? (
@@ -163,7 +178,6 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, loadingState  }
                                 </button>
 
                                 <button 
-                                    //className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-md" 
                                     className={`bg-gray-500 text-white mt-2 px-4 py-2 rounded-md
                                         ${loadingState?.isLoading && loadingState.type === 'edit' ? "invisible" : "hover:bg-gray-700"}`}
                                     onClick={handleCancelEdit}
@@ -218,7 +232,7 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, loadingState  }
                 </div>
             )}
 
-            {user?.id === comment.userId._id && !isDeleted && (
+            {user?.id === commenterDetails._id && !isDeleted && (
                 <div className="mt-2 flex-center gap-4 border-t border-gray-100 pt-3">
                     <p
                         className="font-inter text-sm green_gradient cursor-pointer hover:text-purple-700"

@@ -9,7 +9,7 @@ import Sharing from "../sharing/Sharing";
 import PostActivity from "../PostActivity";
 import { useState, useEffect, useRef } from "react";
 import { BookmarkButton, CommentButton, LikeButton, RepostButton } from "../engagements";
-import { PromptCommentList } from "@components/commentsDir";
+import { CommentCardList } from "@components/commentsDir";
 
 /**
  * PromptCard Component
@@ -302,7 +302,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
 
       {/* Comment List */}
       {pathName === `/promptDetails/${post._id}` && ( // Only display comments in prompt detail page.
-        <PromptCommentList entity={post} user={user} entityType={"prompt"} />
+        <CommentCardList params={post} entityType={"prompt"}/>
       )}
     </div>
   );
