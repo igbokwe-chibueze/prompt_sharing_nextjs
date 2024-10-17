@@ -21,7 +21,6 @@ const CommentCardList = ({ params, entityType }) => {
 
 
     const [repliesLimit, setRepliesLimit] = useState(1); // Fixed limit for nested replies
-    const [isLoadingMoreReplies, setIsLoadingMoreReplies] = useState(false); // Track loading state for "See More" button on nested replies
 
     const [loadingState, setLoadingState] = useState({ type: null, isLoading: false }); // Unified loading state
     const [loading, setLoading] = useState(true);
@@ -65,12 +64,11 @@ const CommentCardList = ({ params, entityType }) => {
             } finally {
                 setLoading(false); // Stop loading once data is fetched
                 setIsLoadingMoreComments(false); // Reset loading state after fetching
-                setIsLoadingMoreReplies(false)
             }
         };
 
         fetchComment();
-    }, [commentId, commentsLimit, repliesLimit, rootComments]);
+    }, [commentId, commentsLimit, repliesLimit, rootCommentsCount,]);
 
     
     const handleReply = async (commentId, replyContent) => {
@@ -106,9 +104,19 @@ const CommentCardList = ({ params, entityType }) => {
                             : comment
                     )
                 );
+                setTotalRootCommentsCount((prevCount) => prevCount + 1); // Increment the total count
             } else {
                 alert('Failed to post reply');
             }
+            // if (res.ok) {
+            //     const newComment = await res.json();
+    
+            //     // Add the new comment to the root comments array
+            //     setRootComments((prevComments) => [newComment, ...prevComments]);
+            //     setTotalRootCommentsCount((prevCount) => prevCount + 1); // Increment the total count
+            // } else {
+            //     alert('Failed to post comment');
+            // }
         } catch (error) {
             console.error('Failed to post reply:', error);
         } finally {
@@ -227,17 +235,65 @@ const CommentCardList = ({ params, entityType }) => {
         setCommentsLimit((prevLimit) => prevLimit + 2); // Increase the comments limit to fetch more comments
     };
 
-    // redirects to the comment details page of the root comment to show the replies.
+    // DO NOT DELETE redirects to the comment details page of the root comment to show the replies.
     // const handleSeeMoreReplies = (rootCommentId) => {
     //     // Redirect to the comment details page for the selected root comment
     //     //router.push(`/commentDetails/${rootCommentId}`);
     // };
 
-    // If i dont want to redirect, i can stream in more reply instead. I prefer to redirect instead as above.
-    const handleSeeMoreReplies = async () => {
-        setIsLoadingMoreReplies(true);
-        setRepliesLimit((prevLimit) => prevLimit + 1); // Increase the replies limit to fetch more replies
+    const handleSeeMoreReplies = async (rootCommentId) => {
+        // Find the comment in rootComments to update its loading state
+        setRootComments((prevComments) =>
+            prevComments.map((comment) =>
+                comment._id === rootCommentId
+                    ? { ...comment, isLoadingMoreReplies: true } // Set loading state for this comment
+                    : comment
+            )
+        );
+    
+        try {
+            // Fetch replies with an updated repliesLimit to show only one additional reply
+            const res = await fetch(`/api/comments/commentDetails/${rootCommentId}?repliesLimit=${repliesLimit + 1}`);
+            const data = await res.json();
+    
+            // Ensure we are receiving the correct data structure
+            if (Array.isArray(data.populatedComments) && data.populatedComments.length > 0) {
+                // Find the new reply that is not already displayed
+                const newReply = data.populatedComments.find(reply => 
+                    !rootComments.find(comment => comment._id === rootCommentId).replies.some(existingReply => existingReply._id === reply._id)
+                );
+    
+                // Update the state with the new reply only if it exists
+                if (newReply) {
+                    setRootComments((prevComments) =>
+                        prevComments.map((comment) =>
+                            comment._id === rootCommentId
+                                ? {
+                                    ...comment,
+                                    replies: [...comment.replies, newReply], // Add the newly fetched reply
+                                    repliesLimit: comment.repliesLimit + 1 // Increment the limit for the next fetch
+                                  }
+                                : comment
+                        )
+                    );
+                }
+            } else {
+                console.error('Unexpected data structure for populatedComments:', data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch more replies:', error);
+        } finally {
+            // Set loading state to false after fetching
+            setRootComments((prevComments) =>
+                prevComments.map((comment) =>
+                    comment._id === rootCommentId
+                        ? { ...comment, isLoadingMoreReplies: false } // Reset loading state
+                        : comment
+                )
+            );
+        }
     };
+    
 
     return (
         <div className="container mx-auto">
@@ -286,11 +342,11 @@ const CommentCardList = ({ params, entityType }) => {
                             {rootComment.replies?.length < rootComment.totalReplyCount && (
                                 <button
                                     className={`text-blue-700 mt-2 p-2 rounded-md
-                                        ${isLoadingMoreReplies ? "bg-gray-400 border-0 cursor-not-allowed" : "hover:underline hover:bg-gray-200"}`}
-                                    disabled={isLoadingMoreReplies}
-                                    onClick={handleSeeMoreReplies}
+                                        ${rootComment.isLoadingMoreReplies ? "bg-gray-400 border-0 cursor-not-allowed" : "hover:underline hover:bg-gray-200"}`}
+                                    disabled={rootComment.isLoadingMoreReplies}
+                                    onClick={() => handleSeeMoreReplies(rootComment._id)}
                                 >
-                                    {isLoadingMoreReplies ? (
+                                    {rootComment.isLoadingMoreReplies ? (
                                         <span className="flex items-center space-x-2">
                                             <LoadingIcon className={"animate-spin fill-white w-4 h-4"} />
                                             <p>Loading...</p>
@@ -354,11 +410,11 @@ const CommentCardList = ({ params, entityType }) => {
                             {rootComment.replies?.length < rootComment.totalReplyCount && (
                                 <button
                                     className={`text-blue-700 mt-2 p-2 rounded-md
-                                        ${isLoadingMoreReplies ? "bg-gray-400 border-0 cursor-not-allowed" : "hover:underline hover:bg-gray-200"}`}
-                                    disabled={isLoadingMoreReplies}
-                                    onClick={handleSeeMoreReplies}
+                                        ${rootComment.isLoadingMoreReplies ? "bg-gray-400 border-0 cursor-not-allowed" : "hover:underline hover:bg-gray-200"}`}
+                                    disabled={rootComment.isLoadingMoreReplies}
+                                    onClick={() => handleSeeMoreReplies(rootComment._id)}
                                 >
-                                    {isLoadingMoreReplies ? (
+                                    {rootComment.isLoadingMoreReplies ? (
                                         <span className="flex items-center space-x-2">
                                             <LoadingIcon className={"animate-spin fill-white w-4 h-4"} />
                                             <p>Loading...</p>
