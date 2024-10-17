@@ -232,7 +232,7 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, promptDetails, 
                 </div>
             )}
 
-            {user?.id === commenterDetails._id && !isDeleted && (
+            {user?.id === commenterDetails._id && !isDeleted && pathName !== "/" && (
                 <div className="mt-2 flex-center gap-4 border-t border-gray-100 pt-3">
                     <p
                         className="font-inter text-sm green_gradient cursor-pointer hover:text-purple-700"

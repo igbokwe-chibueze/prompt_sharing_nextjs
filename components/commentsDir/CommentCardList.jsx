@@ -4,8 +4,12 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { LoadingIcon } from "@constants/icons";
 import { CommentCard } from "@components/commentsDir";
+import { usePathname, useRouter } from "next/navigation";
 
 const CommentCardList = ({ params, entityType }) => {
+
+    const router = useRouter();
+    const pathname = usePathname();
 
     const { data: session } = useSession();
     const user = session?.user;
@@ -220,6 +224,14 @@ const CommentCardList = ({ params, entityType }) => {
                 });
                 setTotalRootCommentsCount(prev => prev - 1);
                 alert("Comment deleted successfully");
+
+                // Check if the current pathname includes the commentId (i.e., we are on the comment details page)
+                // This so the main comment on the commentDetails page when deleted would redirect.
+                if (pathname.includes(commentId)) {
+                    // Redirect to the previous page
+                    router.back();
+                }
+
             } else {
                 alert("Failed to delete comment.");
             }
