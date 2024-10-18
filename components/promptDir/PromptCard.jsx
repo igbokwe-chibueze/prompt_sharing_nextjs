@@ -6,10 +6,10 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Rating from "../Rating";
 import Copy from "../Copy";
 import Sharing from "../sharing/Sharing";
-import PostActivity from "../PostActivity";
 import { useState, useEffect, useRef } from "react";
 import { BookmarkButton, CommentButton, LikeButton, RepostButton } from "../engagements";
 import { CommentCardList } from "@components/commentsDir";
+import EntityActivity from "@components/EntityActivity";
 
 /**
  * PromptCard Component
@@ -117,11 +117,14 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
     if (post.creator._id !== user.id) {
       // Increment the prompt click count if not the creator
       try {
-        await fetch(`/api/prompt/${post._id}/incrementPromptClick`, {
+        await fetch(`/api/incrementEntityClick/${post._id}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify({
+            entityType: "prompt"
+          }),
         });
     
         setPromptClickCount(promptClickCount + 1);
@@ -188,6 +191,8 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
             {post.prompt}
           </p>
 
+          <button type="button" onClick={handlePromptClick}>Prompt Count</button>
+
           {/* Date and time */}
           <div className=" flex items-center space-x-2 font-inter text-xs text-gray-500">
             {/* Created at information */}
@@ -233,17 +238,10 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
             />
 
             {/* Post Activity */}
-            <div className="flex justify-start items-center">
-              
-              <PostActivity post={post} session={session} setEngagements={setTotalEngagements}/>
-
-              {/* Display Total Engagements */}
-              {totalEngagements > 0 && (
-                <div className="font-inter text-sm text-gray-700">
-                  {totalEngagements}
-                </div>
-              )}
-            </div>
+            <EntityActivity
+              {...engagementProps}
+              initialCount={post.likes?.length + post.bookmarks?.length + post.reposts?.length + post.ratings.length}
+            />
 
             {/* Bookmark Button */}
             <BookmarkButton 

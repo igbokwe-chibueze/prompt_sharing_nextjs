@@ -3,6 +3,7 @@
 # Files and Directories
 .env
 /trash/
+/Archive/
 
 # dependencies
 /node_modules

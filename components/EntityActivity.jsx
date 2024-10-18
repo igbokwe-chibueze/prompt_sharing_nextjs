@@ -12,8 +12,11 @@ const EntityActivity = ({ entity, user, entityType, initialCount }) => {
     const reposts = entity.reposts?.length;
     const ratings = entity?.ratings?.length;
 
-    const isCreator = entity?.userId?._id === user?.id;
+    // Determine if the current user is the creator of the entity (either a 'prompt' or other type).
+    // For 'prompt', compare the creator's ID; otherwise, compare the userId.
+    const isCreator = (entityType === "prompt" ? entity?.creator?._id : entity?.userId?._id) === user?.id;
 
+    
   return (
     <div>
         <div className='flex items-center'>

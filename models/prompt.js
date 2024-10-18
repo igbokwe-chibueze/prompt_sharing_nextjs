@@ -36,7 +36,7 @@ const PromptSchema = new Schema({
     type: Number,
     default: 0,
   },
-  promptClickCount: {
+  entityClickCount: {
     type: Number,
     default: 0,
   },
