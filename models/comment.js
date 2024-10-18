@@ -39,6 +39,14 @@ const CommentSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User'
     }],
+    profileClickCount: {
+        type: Number,
+        default: 0,
+    },
+    entityClickCount: {
+        type: Number,
+        default: 0,
+    },
     deletedAt: {
         type: Date,
         default: null, // null means the comment is not deleted

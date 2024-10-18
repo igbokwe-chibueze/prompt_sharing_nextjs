@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { BookmarkButton, CommentButton, LikeButton, RepostButton } from '@components/engagements';
 import Sharing from '@components/sharing/Sharing';
+import EntityActivity from '@components/EntityActivity';
 
 const CommentCard = ({ comment, onReply, onEdit, onDelete, user, promptDetails, loadingState  }) => {
 
@@ -16,6 +17,8 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, promptDetails, 
 
     const [showEditBox, setShowEditBox] = useState(false);
     const [editContent, setEditContent] = useState(comment.content);
+
+    const [commentClickCount, setCommentClickCount] = useState(comment.commentClickCount || 0);
 
     const replyBoxRef = useRef(null); // Create a ref for the reply textarea
 
@@ -84,22 +87,25 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, promptDetails, 
             return;
         }
 
-        // Determine if the logged-in user is the creator of the prompt
-        // if (post.creator._id !== user.id) {
-        // // Increment the prompt click count if not the creator
-        // try {
-        //     await fetch(`/api/prompt/${post._id}/incrementPromptClick`, {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     });
-        
-        //     setPromptClickCount(promptClickCount + 1);
-        // } catch (error) {
-        //     console.log("Error:", error);
-        // }
-        // }
+        // Determine if the logged-in user is the creator of the comment
+        if (comment.userId?._id !== user.id) {
+            // Increment the prompt click count if not the creator
+            try {
+                    await fetch(`/api/incrementEntityClick/${comment._id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        entityType: "comment"
+                    }),
+                });
+            
+                setCommentClickCount(commentClickCount + 1);
+            } catch (error) {
+                console.log("Error:", error);
+            }
+        }
 
         // Navigate to the prompt details page
         router.push(`/commentDetails/${comment._id}`);
@@ -188,12 +194,16 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, promptDetails, 
                         </div>
                     ) : (
                         // If not in edit mode, display the comment content
-                        <p
-                            className={`${pathName !== `/commentDetails/${comment._id}` ? "cursor-pointer" : ""}`}
-                            onClick={pathName !== `/commentDetails/${comment._id}` ? handleCommentClick : undefined}
-                        >
-                            {comment.content}
-                        </p>
+                        <>
+                            <p
+                                className={`${pathName !== `/commentDetails/${comment._id}` ? "cursor-pointer" : ""}`}
+                                onClick={pathName !== `/commentDetails/${comment._id}` ? handleCommentClick : undefined}
+                            >
+                                {comment.content}
+                            </p>
+
+                            <button type="button" onClick={handleCommentClick}>Comment Count</button>
+                        </>
                     )}
                 </div>
             )
@@ -224,6 +234,11 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, promptDetails, 
                         <BookmarkButton 
                             {...engagementProps}
                             initialCount={comment.bookmarks.length}
+                        />
+
+                        <EntityActivity
+                            {...engagementProps}
+                            initialCount={comment.likes?.length + comment.bookmarks?.length + comment.reposts?.length}
                         />
 
                         <Sharing {...engagementProps}/>
