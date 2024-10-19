@@ -28,13 +28,13 @@ export const POST = async (request, { params }) => {
             return new Response("Entity not found", { status: 404 });
         }
 
-        const updatedComment = await Model.findByIdAndUpdate(
+        const updatedEntity = await Model.findByIdAndUpdate(
             entity,
             { $inc: { entityClickCount: 1 } }, // Use the $inc operator to increment the entityClickCount by 1
             { new: true } // Return the updated document after the update operation
         );
 
-        return new Response(JSON.stringify({ updatedComment }), { status: 200 });
+        return new Response(JSON.stringify({ updatedEntity }), { status: 200 });
     } catch (error) {
         return new Response("Error updating entityClickCount", { status: 500 });
     }

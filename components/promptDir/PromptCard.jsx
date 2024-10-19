@@ -33,8 +33,6 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
   const [profileClickCount, setProfileClickCount] = useState(post.profileClickCount || 0);
   const [promptClickCount, setPromptClickCount] = useState(post.promptClickCount || 0);
 
-  const [totalEngagements, setTotalEngagements] = useState(0);
-
   const replyBoxRef = useRef(null); // Create a ref for the reply textarea
 
   useEffect(() => {
@@ -82,11 +80,14 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
     if (post.creator._id !== user.id) {
       // Increment the profile click count if not the creator
       try {
-        await fetch(`/api/prompt/${post._id}/incrementProfileClick`, {
+        await fetch(`/api/incrementProfileClick/${post._id}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify({
+            entityType: "prompt"
+          }),
         });
     
         setProfileClickCount(profileClickCount + 1);
@@ -159,7 +160,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
           <div className="flex justify-between items-start gap-5">
             {/* User information and profile navigation */}
             <div
-              className={"flex-1 flex justify-start items-center gap-3 cursor-pointer"}
+              className={"flex-1 flex justify-start items-center gap-3 cursor-pointer hover:bg-slate-200"}
               onClick={handleProfileClick}
             >
               <Image
@@ -185,7 +186,7 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
 
           {/* Prompt text and navigation to details */}
           <p
-            className={`my-4 font-satoshi text-sm text-gray-700 ${pathName !== `/promptDetails/${post._id}` ? "cursor-pointer" : ""}`}
+            className={`my-4 font-satoshi text-sm text-gray-700 ${pathName !== `/promptDetails/${post._id}` ? "cursor-pointer hover:bg-slate-200" : ""}`}
             onClick={pathName !== `/promptDetails/${post._id}` ? handlePromptClick : undefined}
           >
             {post.prompt}

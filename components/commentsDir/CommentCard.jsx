@@ -18,6 +18,7 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, promptDetails, 
     const [showEditBox, setShowEditBox] = useState(false);
     const [editContent, setEditContent] = useState(comment.content);
 
+    const [profileClickCount, setProfileClickCount] = useState(comment.profileClickCount || 0);
     const [commentClickCount, setCommentClickCount] = useState(comment.commentClickCount || 0);
 
     const replyBoxRef = useRef(null); // Create a ref for the reply textarea
@@ -69,14 +70,41 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, promptDetails, 
         onDelete(comment._id);
     };
 
-    const handleProfileRedirect = (details) => {
+    const handleProfileRedirect = async (details) => {
+
+        if (!user) {
+            // Redirect to login page with message
+            const message = "You need to be logged in to view this profile. Please log in to continue.";
+            router.push(`/login?message=${message}`);
+            return;
+        }
+      
+        // Determine if the logged-in user is the creator of the prompt
+        if (details._id !== user.id) {
+            // Increment the profile click count if not the creator
+            try {
+                await fetch(`/api/incrementProfileClick/${comment._id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        entityType: "comment"
+                    }),
+                });
+            
+                setProfileClickCount(profileClickCount + 1);
+            } catch (error) {
+                console.log("Error:", error);
+            }
+        }
+
         if (details._id === user.id) {
             router.push("/profile");
         } else {
             router.push(`/profile/${details._id}?name=${details.username}`);
         }
     };
-
 
     // Handles commentt click - shows login popup if not logged in
     const handleCommentClick = async () => {
@@ -151,7 +179,7 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, promptDetails, 
                         ) : ""}
                     </p>
 
-                    <div className="flex items-center space-x-2 cursor-pointer" 
+                    <div className="flex items-center space-x-2 cursor-pointer hover:bg-slate-200" 
                         onClick={() => handleProfileRedirect(commenterDetails)}
                     >
                         <Image
@@ -195,7 +223,7 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, promptDetails, 
                     ) : (
                         // If not in edit mode, display the comment content
                         <p
-                            className={`${pathName !== `/commentDetails/${comment._id}` ? "cursor-pointer" : ""}`}
+                            className={`${pathName !== `/commentDetails/${comment._id}` ? "cursor-pointer hover:bg-slate-200" : ""}`}
                             onClick={pathName !== `/commentDetails/${comment._id}` ? handleCommentClick : undefined}
                         >
                             {comment.content}
