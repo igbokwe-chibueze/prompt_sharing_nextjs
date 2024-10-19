@@ -194,17 +194,13 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, promptDetails, 
                         </div>
                     ) : (
                         // If not in edit mode, display the comment content
-                        <>
-                            <p
-                                className={`${pathName !== `/commentDetails/${comment._id}` ? "cursor-pointer" : ""}`}
-                                onClick={pathName !== `/commentDetails/${comment._id}` ? handleCommentClick : undefined}
-                            >
-                                {comment.content}
-                            </p>
-
-                            <button type="button" onClick={handleCommentClick}>Comment Count</button>
-                        </>
-                    )}
+                        <p
+                            className={`${pathName !== `/commentDetails/${comment._id}` ? "cursor-pointer" : ""}`}
+                            onClick={pathName !== `/commentDetails/${comment._id}` ? handleCommentClick : undefined}
+                        >
+                            {comment.content}
+                        </p>
+                )}
                 </div>
             )
         }

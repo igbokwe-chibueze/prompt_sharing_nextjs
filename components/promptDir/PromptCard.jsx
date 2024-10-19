@@ -191,8 +191,6 @@ const PromptCard = ({ post, handleEdit, handleDelete, handleTagClick }) => {
             {post.prompt}
           </p>
 
-          <button type="button" onClick={handlePromptClick}>Prompt Count</button>
-
           {/* Date and time */}
           <div className=" flex items-center space-x-2 font-inter text-xs text-gray-500">
             {/* Created at information */}

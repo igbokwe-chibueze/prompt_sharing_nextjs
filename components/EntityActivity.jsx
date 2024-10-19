@@ -1,5 +1,5 @@
 import { BookmarkIcon, CenterIcon, CloseFilledIcon, HeartIcon, RepeatIcon, StarIcon } from "@constants/icons"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 
 const EntityActivity = ({ entity, user, entityType, initialCount }) => {
@@ -7,16 +7,22 @@ const EntityActivity = ({ entity, user, entityType, initialCount }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [totalEngagements, setTotalEngagements] = useState(initialCount);
 
-    const likes = entity.likes?.length;
-    const bookmarks = entity.bookmarks?.length;
-    const reposts = entity.reposts?.length;
-    const ratings = entity?.ratings?.length;
+    const likes = entity.likes?.length || 0;
+    const bookmarks = entity.bookmarks?.length || 0;
+    const reposts = entity.reposts?.length || 0;
+    const ratings = entityType === "prompt" ? entity?.ratings?.length || 0 : 0; // add rating only if entityType is "prompt", if not make rating 0.
 
     // Determine if the current user is the creator of the entity (either a 'prompt' or other type).
     // For 'prompt', compare the creator's ID; otherwise, compare the userId.
     const isCreator = (entityType === "prompt" ? entity?.creator?._id : entity?.userId?._id) === user?.id;
 
-    
+    // Recalculate total engagements when likes, bookmarks, reposts, or ratings change
+    useEffect(() => {
+        const total = likes + bookmarks + reposts + ratings;
+        setTotalEngagements(total);
+    }, [likes, bookmarks, reposts, ratings, initialCount]); // Dependencies array watches these values for changes
+
+
   return (
     <div>
         <div className='flex items-center'>
