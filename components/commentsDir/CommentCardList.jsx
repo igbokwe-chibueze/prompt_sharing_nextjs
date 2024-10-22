@@ -112,15 +112,6 @@ const CommentCardList = ({ params, entityType }) => {
             } else {
                 alert('Failed to post reply');
             }
-            // if (res.ok) {
-            //     const newComment = await res.json();
-    
-            //     // Add the new comment to the root comments array
-            //     setRootComments((prevComments) => [newComment, ...prevComments]);
-            //     setTotalRootCommentsCount((prevCount) => prevCount + 1); // Increment the total count
-            // } else {
-            //     alert('Failed to post comment');
-            // }
         } catch (error) {
             console.error('Failed to post reply:', error);
         } finally {

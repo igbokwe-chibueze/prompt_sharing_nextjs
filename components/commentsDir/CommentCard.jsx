@@ -189,7 +189,13 @@ const CommentCard = ({ comment, onReply, onEdit, onDelete, user, promptDetails, 
                             height={40}
                             className="rounded-full object-contain"
                         />
-                        <p className="font-bold">{commenterDetails.username}</p>
+
+                        <div className="flex flex-col">
+                            <p className="font-bold">{commenterDetails.username}</p>
+                            <p className="font-inter text-sm text-gray-500">
+                                {commenterDetails.email}
+                            </p>
+                        </div>
                     </div>
 
                     {showEditBox ? (
