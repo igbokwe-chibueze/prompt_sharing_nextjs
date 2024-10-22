@@ -46,7 +46,7 @@ const CommentCardList = ({ params, entityType }) => {
             if (rootComments === null) setLoading(true);
 
             try {
-                const res = await fetch(`/api/comments/commentDetails/${commentId}?commentsLimit=${commentsLimit}&repliesLimit=${repliesLimit}&entityType=${entityType}`);
+                const res = await fetch(`/api/comments/${commentId}?commentsLimit=${commentsLimit}&repliesLimit=${repliesLimit}&entityType=${entityType}`);
                 const data = await res.json();
 
                 // Only set comment when entity is comment.
@@ -58,7 +58,7 @@ const CommentCardList = ({ params, entityType }) => {
                 setRootComments(data.populatedComments); // rootComments includes replies
 
                 // Fetch the total count of comments and replies
-                const responseCount = await fetch(`/api/comments/commentDetails/${commentId}?count=true&entityType=${entityType}`);
+                const responseCount = await fetch(`/api/comments/${commentId}?count=true&entityType=${entityType}`);
                 const countData = await responseCount.json();
 
                 setTotalRootCommentsCount(countData.totalRootCommentCount); // Count of root comments (not replies)
@@ -129,7 +129,7 @@ const CommentCardList = ({ params, entityType }) => {
     
         try {
             // Send a PUT request to the server to update the comment with the given commentId
-            const res = await fetch(`/api/comments/commentDetails/${commentId}`, {
+            const res = await fetch(`/api/comments/${commentId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json', // Specify the format of the request body
@@ -178,7 +178,7 @@ const CommentCardList = ({ params, entityType }) => {
         if (!confirmDelete) return;
     
         try {
-            const res = await fetch(`/api/comments/commentDetails/${commentId}`, {
+            const res = await fetch(`/api/comments/${commentId}`, {
                 method: 'DELETE',
             });
     
@@ -256,7 +256,7 @@ const CommentCardList = ({ params, entityType }) => {
     
         try {
             // Fetch replies with an updated repliesLimit to show only one additional reply
-            const res = await fetch(`/api/comments/commentDetails/${rootCommentId}?repliesLimit=${repliesLimit + 1}`);
+            const res = await fetch(`/api/comments/${rootCommentId}?repliesLimit=${repliesLimit + 1}`);
             const data = await res.json();
     
             // Ensure we are receiving the correct data structure

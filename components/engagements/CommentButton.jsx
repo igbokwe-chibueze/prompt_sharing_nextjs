@@ -17,7 +17,7 @@ const CommentButton = ({entity, entityType,}) => {
         const fetchCommentCount = async () => {
             try {
                 // Fetch the total count of comments and replies
-                const responseCount = await fetch(`/api/comments/commentDetails/${objectId}?count=true&entityType=${entityType}`);
+                const responseCount = await fetch(`/api/comments/${objectId}?count=true&entityType=${entityType}`);
                 const countData = await responseCount.json();
                 setCommentsCount(countData.totalCount); // Total count including replies
             } catch (error) {

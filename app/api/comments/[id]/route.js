@@ -1,65 +1,236 @@
-// pages/api/comments/[postId]/route.js
-
 import Comment from "@models/comment";
+import Prompt from "@models/prompt";
 import { connectToDB } from "@utils/database";
 
-// Since this is recieving a dynamic post id, this should have been handled in prompt and not comments. This should have been
-//an endpoint under the dynamic prompt folder [id] i.e api/prompt/[id]/comments
-
-const populateReplies = async (commentId, limit = 2) => {
-    const replies = await Comment.find({ parentCommentId: commentId })
-        .sort({ createdAt: 1 })
-        .populate('userId', 'username image')
-        .limit(limit); // Limit the number of replies returned
-
-    const populatedReplies = [];
-
-    for (let reply of replies) {
-        const populatedReply = reply.toObject();
-        populatedReply.replies = await populateReplies(populatedReply._id, limit);
-        populatedReplies.push(populatedReply);
-    }
-
-    return populatedReplies;
-};
-
+// GET request handler for fetching comments or counts
 export const GET = async (request, { params }) => {
     try {
         await connectToDB();
 
-        const postId = params.id;
+        const objectId = params.id; // Post or comment ID
         const url = new URL(request.url);
-        const countOnly = url.searchParams.get('count');
-        const limit = parseInt(url.searchParams.get('commentsLimit')) || 2;
+        const countOnly = url.searchParams.get("count"); // Query param to check if only count is needed
+        const limit = parseInt(url.searchParams.get('commentsLimit')) || undefined;
+        const replyLimit = parseInt(url.searchParams.get('repliesLimit')) || undefined;
+        const entityType = url.searchParams.get("entityType"); // Determines if it's a 'prompt' or 'comment'
 
+        const prompt = entityType === "prompt"; // Check if entity type is 'prompt'
+
+        // Handle count requests
         if (countOnly) {
-            // Count documents with deletedAt being null or not set
-            const totalCommentsAndReplies = await Comment.countDocuments({ postId, $or: [{ deletedAt: { $exists: false } }, { deletedAt: null }] });
+            const rootComments = await fetchRootComments(objectId, prompt);
 
-            const totalrootComments = await Comment.countDocuments({ postId, parentCommentId: null })
-            return new Response(JSON.stringify({ totalCount: totalCommentsAndReplies, commentsCount:totalrootComments }), { status: 200 });
-        } else {
-            const rootComments = await Comment.find({ postId, parentCommentId: null })
-                .sort({ createdAt: -1 })
-                .populate('userId', 'username image')
-                .limit(limit); // Limit the number of root comments returned
+            // Initialize total comment count
+            const rootCommentCount = rootComments.length;
 
-            const populatedComments = [];
+            let totalCommentCount = rootCommentCount;
 
-            for (let comment of rootComments) {
-                const populatedComment = comment.toObject();
-                populatedComment.replies = await populateReplies(populatedComment._id, limit);
-                populatedComments.push(populatedComment);
+            // Count nested replies, subtract deleted comments if necessary
+            for (const comment of rootComments) {
+                if (comment.deletedAt !== null) totalCommentCount -= 1;
+                totalCommentCount += await countCommentsRecursively(comment._id);
             }
 
-            return new Response(JSON.stringify(populatedComments), { status: 200 });
-        }
+            return new Response(JSON.stringify({ totalCount: totalCommentCount, totalRootCommentCount: rootCommentCount }), {
+                status: 200,
+            });
 
+        // Handle requests to fetch actual comments
+        } else {
+            if (prompt) { // This is called on a prompt
+
+                const rootComments = await fetchRootComments(objectId, prompt, {
+                    sort: { createdAt: -1 },
+                    populate: "userId",
+                    limit: limit,
+                });
+
+                const populatedComments = [];
+
+                for (let comment of rootComments) {
+                    const populatedComment = comment.toObject();
+                    const { replies, totalReplyCount } = await populateReplies(populatedComment._id, replyLimit);
+                    populatedComment.replies = replies;
+                    populatedComment.totalReplyCount = totalReplyCount; // Add the total reply count to the comment object
+                    populatedComments.push(populatedComment);
+                }
+
+                return new Response(JSON.stringify({ populatedComments }), {
+                    status: 200,
+                });
+
+            } else { // This is called on a comment.
+                const comment = await Comment.findById(objectId)
+                    .populate("userId")
+                    .populate({
+                        path: 'parentCommentId', // Populate the parent comment (the comment that this reply is responding to)
+                        populate: {
+                            path: 'userId', // Populate the user who made the parent comment
+                            select: 'username image' // Only select the fields you want to display
+                        }
+                    })
+
+                if (!comment)
+                    return new Response("Comment Not Found", { status: 404 });
+
+                const promptDetails = await Prompt.findById(comment.postId).populate("creator") // The prompt the comments are attached to.
+
+                const rootComments = await fetchRootComments(objectId, prompt, {
+                    sort: { createdAt: -1 },
+                    populate: "userId",
+                    limit: limit,
+                });  
+
+                const populatedComments = [];
+
+                //******!!!!DO NOT DELETE !!****
+                //This is used if "See More" btn redirects to the root comment details page.
+                // Returns a fixed numeber of replies(replyLimit) to the root comment.
+                // for (let comment of rootComments) {
+                //     const populatedComment = comment.toObject();
+                //     populatedComment.replies = await populateReplies(populatedComment._id, replyLimit );
+                //     populatedComments.push(populatedComment);
+                // }
+
+                // This is not needed if nested replies navigate to the comment details page of its root comment instead use the commented out code above.
+                // Returns not just the replies to the root comments but also the count. 
+                //This is needed for the "See More" btn to be able to load additional replies.
+                for (let comment of rootComments) {
+                    const populatedComment = comment.toObject();
+                    const { replies, totalReplyCount } = await populateReplies(populatedComment._id, replyLimit);
+                    populatedComment.replies = replies;
+                    populatedComment.totalReplyCount = totalReplyCount; // Add the total reply count to the comment object
+                    populatedComments.push(populatedComment);
+                }
+
+                return new Response(JSON.stringify({ comment, populatedComments, promptDetails }), {
+                    status: 200,
+                });
+            }
+        }
     } catch (error) {
-        console.error('Error handling request:', error);
-        return new Response("Error handling request", { status: 500 });
+        return new Response("Internal Server Error", { status: 500 });
     }
 };
+
+const populateReplies = async (commentId, replyLimit) => {
+    const replies = await Comment.find({ parentCommentId: commentId })
+        .sort({ createdAt: -1 })
+        .populate('userId', 'username image')
+        .populate({
+            path: 'parentCommentId', // Populate the parent comment (the comment that this reply is responding to)
+            populate: {
+                path: 'userId', // Populate the user who made the parent comment
+                select: 'username image' // Only select the fields you want to display
+            }
+        })
+        .limit(replyLimit) // set how many replies are allowed to show.
+
+    // Fetch the total count of replies for the given commentId
+    // This is not needed if nested replies navigate to the comment details page of its root comment
+    const totalReplyCount = await Comment.countDocuments({ parentCommentId: commentId });
+
+    return { replies, totalReplyCount }; // totalReplyCount is not needed if the nested replies navigate to the comment details page of its root comment
+};
+
+// Helper function to fetch root-level comments based on entity type
+const fetchRootComments = async (objectId, isPrompt, options = {}) => {
+    const query = isPrompt
+        ? { postId: objectId, parentCommentId: null } // Its used on a prompt.
+        : { parentCommentId: objectId }; // Its used on a comment.
+
+    // Apply optional sorting (e.g., by creation date) if specified in `options.sort`, default to no sorting.
+    // Populate referenced fields (e.g., user details) if specified in `options.populate`, otherwise return raw ObjectIds.
+    const baseQuery = Comment.find(query)
+        .sort(options.sort || {})
+        .populate(options.populate || "")
+        .populate({
+            path: 'parentCommentId', // Populate the parent comment (the comment that this reply is responding to)
+            populate: {
+                path: 'userId', // Populate the user who made the parent comment
+                select: 'username image' // Only select the fields you want to display
+            }
+        })
+
+    // If a limit is specified, apply it
+    if (options.limit) {
+        baseQuery.limit(options.limit);
+    }
+
+    return await baseQuery;
+};
+
+
+// Helper function to recursively count nested comments
+const countCommentsRecursively = async (parentCommentId) => {
+    const childComments = await Comment.find({ parentCommentId });
+    let totalCount = childComments.length;
+
+    for (const comment of childComments) {
+        totalCount += await countCommentsRecursively(comment._id);
+    }
+
+    return totalCount;
+};
+
+
+export const DELETE = async (request, { params }) => {
+    try {
+        await connectToDB();
+
+        const objectId = params.id;
+
+        // Find the comment by ID
+        const comment = await Comment.findById(objectId);
+
+        if (!comment) {
+            return new Response("Comment not found", { status: 404 });
+        }
+
+        // Check if the comment has non-deleted replies
+        const hasNonDeletedReplies = await Comment.countDocuments({ 
+            parentCommentId: objectId,
+            deletedAt: null, // Find only non-deleted replies
+        });
+
+        if (hasNonDeletedReplies) {
+            // If the comment has non-deleted replies, "soft delete" it
+            comment.deletedAt = new Date();
+            comment.content = "This comment is no longer available";
+            await comment.save();
+
+            // Return the soft-deleted comment
+            return new Response(JSON.stringify(comment), { status: 200 });
+        } else {
+            // If the comment has no non-deleted replies, hard delete it
+            await Comment.findByIdAndDelete(objectId);
+
+            // Check if this comment was a reply to a soft-deleted parent
+            if (comment.parentCommentId) {
+                const parentComment = await Comment.findById(comment.parentCommentId);
+                if (parentComment && parentComment.deletedAt) {
+                    // Check if the parent has any other non-deleted replies
+                    const parentHasOtherReplies = await Comment.countDocuments({
+                        parentCommentId: comment.parentCommentId,
+                        _id: { $ne: objectId }, // Exclude the current comment
+                        deletedAt: null,
+                    });
+
+                    if (!parentHasOtherReplies) {
+                        // If the parent has no other non-deleted replies, hard delete it
+                        await Comment.findByIdAndDelete(comment.parentCommentId);
+                    }
+                }
+            }
+
+            return new Response(JSON.stringify({ message: "Comment hard deleted" }), { status: 200 });
+        }
+    } catch (error) {
+        console.error('Error deleting comment:', error);
+        return new Response("Error deleting comment", { status: 500 });
+    }
+};
+
 
 export const PATCH = async (request, { params }) => {
     const { content } = await request.json();
@@ -78,62 +249,11 @@ export const PATCH = async (request, { params }) => {
 
         await existingContent.save();
 
-        return new Response("Successfully updated the Comment", { status: 200 });
+        //return new Response("Successfully updated the Comment", { status: 200 });
+        return new Response(JSON.stringify({ existingContent }), {
+            status: 200,
+        });
     } catch (error) {
         return new Response("Error Updating Comment", { status: 500 });
-    }
-};
-
-export const DELETE = async (request, { params }) => {
-    try {
-        await connectToDB();
-
-        const commentId = params.id;
-
-        // Find the comment by ID
-        const comment = await Comment.findById(commentId);
-
-        if (!comment) {
-            return new Response("Comment not found", { status: 404 });
-        }
-
-        // Check if the comment has non-deleted replies
-        const hasNonDeletedReplies = await Comment.countDocuments({ 
-            parentCommentId: commentId,
-            $or: [{ deletedAt: { $exists: false } }, { deletedAt: null }]
-        });
-
-        if (hasNonDeletedReplies) {
-            // If the comment has non-deleted replies, "soft delete" it
-            comment.deletedAt = new Date();
-            comment.content = "This comment is no longer available";
-            await comment.save();
-        } else {
-            // If the comment has no non-deleted replies, hard delete it
-            await Comment.findByIdAndDelete(commentId);
-
-            // Check if this comment was a reply to a soft-deleted parent
-            if (comment.parentCommentId) {
-                const parentComment = await Comment.findById(comment.parentCommentId);
-                if (parentComment && parentComment.deletedAt) {
-                    // Check if the parent has any other non-deleted replies
-                    const parentHasOtherReplies = await Comment.countDocuments({
-                        parentCommentId: comment.parentCommentId,
-                        _id: { $ne: commentId }, // Exclude the current comment
-                        $or: [{ deletedAt: { $exists: false } }, { deletedAt: null }]
-                    });
-
-                    if (!parentHasOtherReplies) {
-                        // If the parent has no other non-deleted replies, hard delete it
-                        await Comment.findByIdAndDelete(comment.parentCommentId);
-                    }
-                }
-            }
-        }
-
-        return new Response("Comment deleted successfully", { status: 200 });
-    } catch (error) {
-        console.error('Error deleting comment:', error);
-        return new Response("Error deleting comment", { status: 500 });
     }
 };
