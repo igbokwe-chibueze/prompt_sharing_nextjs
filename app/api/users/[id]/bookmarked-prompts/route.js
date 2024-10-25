@@ -10,7 +10,7 @@ export const GET = async (request, { params }) => {
     await connectToDB();
 
     // Find all prompts where the user has bookmarked them
-    const prompts = await Prompt.find({ bookmarks: userId }).populate("creator");
+    const prompts = await Prompt.find({ bookmarks: userId }).populate("creator").sort({createdAt: -1 });
 
     if (!prompts) {
       return new Response("No bookmarks found", { status: 404 });

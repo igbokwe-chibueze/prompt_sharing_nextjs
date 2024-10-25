@@ -47,7 +47,10 @@ const RepostCard = ({ repost, originalPost, cardType = "prompt", handleTagClick 
       >
         <RepeatIcon/>
         <h3>
-            {repost.repostedBy.username} reposted: At: {new Date(repost.repostedAt).toLocaleDateString()}
+          {repost.repostedBy?._id === session?.user.id 
+            ? "You reposted" 
+            : `${repost.repostedBy?.username} reposted`} 
+          : At: {new Date(repost.repostedAt).toLocaleDateString()}
         </h3>
       </div>
 

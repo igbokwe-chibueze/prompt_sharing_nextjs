@@ -14,6 +14,8 @@ const MyProfile = () => {
   const [myPosts, setMyPosts] = useState([]);
   const [likedPosts, setLikedPosts] = useState([]);
   const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
+  const [comments, setComments] = useState([]);
+  const [reposts, setReposts] = useState([]);
   
 
   useEffect(() => {
@@ -37,12 +39,27 @@ const MyProfile = () => {
       const data = await response.json();
       setBookmarkedPosts(data);
     };
+
+    const fetchComments = async () => {
+      const response = await fetch(`/api/users/${session?.user.id}/comments`);
+      const data = await response.json();
+      setComments(data);
+    };
+
+    const fetchReposts = async () => {
+      const response = await fetch(`/api/users/${session?.user.id}/reposts`);
+      const data = await response.json();
+      console.log(data);
+      setReposts(data);
+    };
     
 
     if (session?.user?.id) {
       fetchPosts();
       fetchLikedPosts();
       fetchBookmarkedPosts();
+      fetchComments();
+      fetchReposts();
     } else {
       console.log("Session user ID is not available yet.");
     }
@@ -92,6 +109,8 @@ const MyProfile = () => {
         data={myPosts}
         likes={likedPosts}
         bookmarks={bookmarkedPosts}
+        comments={comments}
+        reposts={reposts}
         handleEdit={handleEdit}
         handleDelete={handleDelete}
       />

@@ -8,7 +8,7 @@ export const GET = async (request, { params }) => {
         await connectToDB();
 
         // Find prompts where the user's ID is in the likes array
-        const likedPrompts = await Prompt.find({ likes: params.id }).populate("creator");
+        const likedPrompts = await Prompt.find({ likes: params.id }).populate("creator").sort({createdAt: -1 });
 
         return new Response(JSON.stringify(likedPrompts), { status: 200 });
     } catch (error) {
