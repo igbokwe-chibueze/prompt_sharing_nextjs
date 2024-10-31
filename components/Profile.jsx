@@ -124,7 +124,7 @@ const Profile = ({ data, likes, bookmarks, comments, reposts, handleEdit, handle
       {/* Reposts */}
       {activeTab === 'Reposts' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {(reposts.prompts.length > 0 || reposts.comments.length > 0) ? (
+          {(reposts?.prompts.length > 0 || reposts?.comments.length > 0) ? (
             <>
               {/* Map through reposted prompts */}
               {reposts.prompts.map((prompt) =>
